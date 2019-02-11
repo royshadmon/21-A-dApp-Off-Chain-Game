@@ -10,14 +10,17 @@
     }
   </style>
   <body>
+    <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.20.3.min.js"></script>
     <br><br><br>
-    <button id="startContract" class="button button4" onclick="App.startGame()">Start Game</button>
-    <button id="startContract" class="button button4" onclick="App.join()">Join</button>
+    <button id="startContract" class="button button4" onclick="App.startGame()">Start New Game</button> or
+    <button id="startContract" class="button button4" onclick="App.join()">Join Existing Game</button>
     <br>
     <label for="address">Address</label><input type="text" id="address">
 
     <label for="move">Move</label><input type="text" id="move">
     <button id="makeMove" class="button button4" onclick="App.move()">Move</button>
+
+<br><b3><b3>
 
     <br><br><br>
     <h1>MetaCoin — Example Truffle Dapp</h1>

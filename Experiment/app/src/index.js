@@ -12,15 +12,50 @@ let util;
 
 var accounts;
 var account;
+// let pubnub;
+
+let maxuint = web3.toBigNumber(2).pow(256).sub(1);
+
 
 const App = {
-  web3: null,
-  account: null,
-  meta: null,
-  game: null,
+  web3: null, //i don't think this is needed
+  account: web3.eth.defaultAccount,
+  meta: null, //Metacoin
+  game: null, //metacoin
+  contract: null,
+  opponent: null,
+  gameOver: false,
+  seq: 0,
+  num: 0,
+  whoseTurn: null,
+  pendingMove: null,
+  signature: null,
+  timeout: null,
+  latePlayer: null,
+  timeLeft: null,
+
 
   start: async function() {
     const { web3 } = this;
+
+    // pubnub = new PubNub({
+    //   publishKey: 'pub-c-bb74265f-0631-4f6f-b34f-67dc66d76cfb',
+    //   subscribeKey: 'sub-c-5b729cbc-2bd6-11e9-828a-52de7eb65672'
+    // });
+
+    console.log("my pubnub", pubnub);
+
+    pubnub.addListener({
+      message: function (msg) {
+        App.updateIfValid(msg.message.move, msg.message.signature);
+      },
+    });
+
+    // pubnub.addListener({
+    //     message: function (msg) {
+    //       App.updateIfValid(msg.message.move, msg.message.signature);
+    //     },
+    //   });
 
     util = require('ethereumjs-util')
 
@@ -63,6 +98,21 @@ const App = {
 
 // TwentyOneGame Contract Functions 
   
+
+  sign: async function() {
+    const { web3 } = this;
+    const state = {
+      winner: "Roy",
+      loser: "dog"
+    }
+    const sig = await web3.eth.personal.sign("state", account);
+    console.log("sign message", sig);
+
+    const recover = await web3.eth.personal.ecRecover("state", sig);
+    console.log('who signed', recover);
+
+  },
+
   //this function starts a new instance of a game
   startGame: async function() {
     const { web3 } = this;
@@ -79,9 +129,9 @@ const App = {
           // } else {
             resolve(contract);
           // }
-        });
-      });
-    }
+        })
+      })
+    };
 
     let contract = await deployContract({
       from: account,
@@ -89,6 +139,8 @@ const App = {
       gasPrice: 3000000000,
       value: web3.utils.toWei('0.01', 'ether'),
     });
+
+    console.log("My Contract looks like", contract);
 
     that.contract = contract;
 
@@ -102,8 +154,8 @@ const App = {
         
         that.opponent = opponent;
         that.whoseTurn = that.account;
-        console.log("OPOPO is", opponent, that.account);
-      }); 
+        console.log("OPOPO is", opponent, that);
+      }) 
     });
 
     // console.log(contract);
@@ -151,17 +203,38 @@ const App = {
     //   })
     // }
 
-  subscribe: function () {
+  subscribe: async function () {
     let that = this;
-    console.log("this in subscribe is", this);
-    this.contract.events.allEvents(function (err, event) {
-      that.fetchContractState();  
+    console.log("this in subscribe is", this.contract);
+    
+    const allEvents = (obj) => {
+      return new Promise((resolve, reject) => {
+        this.contract.events.allEvents(obj, (error, events) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(events);
+          }
+        })
+      })
+    };
+
+
+    const events = await allEvents({
+      fromBlock: 0,
+      toBlock: 'latest'
+    });
+    console.log(events);
+    that.fetchContractState();
+
+    pubnub.subscribe({
+      channels: ['21-' + this.contract.options.address],
     });
 
-    // pubnub.subscribe({
-    //   channels: ['21-' + this.contract.options.address],
-    // });
+
   },
+
+
 
   join: async function () {
     const { web3 } = this;
@@ -173,40 +246,9 @@ const App = {
     let contract = GameContract;
     contract.options.address = address;
 
-    // const sendCoins = (obj) => {
-    //   return new Promise((resolve, reject) => {
-    //     contract.methods.join().send(obj, (error, transactionHash) => {
-    //       if (error) {
-    //         reject(error)
-    //       } else {
-    //         resolve(transactionHash)
-    //       }
-
-    //     });
-    //   })
-    // }
-
-
-    // const tranascationHash = await sendCoins({
-    //   value:
-    //   from: 
-    // })
-    // const tranascationHash = await sendCoins({
-    //   value:
-    //   from: 
-    // })
-    // const tranascationHash = await sendCoins({
-    //   value:
-    //   from: 
-    // })
-    // const tranascationHash = await sendCoins({
-    //   value:
-    //   from: 
-    // })
-    // const tranascationHash = await sendCoins({
-    //   value:
-    //   from: 
-    // })
+    contract.methods.player1().call(function (err, player1) {
+      console.log("player1 is", player1);
+    })
 
         // const sendCoins = (obj) => {
     //   return new Promise((resolve, reject) => {
@@ -221,7 +263,7 @@ const App = {
     //   })
     // }
 
-    const join = (obj) => {
+    const joinGame = (obj) => {
       return new Promise((resolve, reject) => {
         contract.methods.join().send(obj, (error, transactionHash) => {
           if (error) {
@@ -230,10 +272,10 @@ const App = {
             resolve(transactionHash);
           }
         })
-      });
+      })
     };
 
-    const transactionHash = await join({
+    const transactionHash = await joinGame({
       value: web3.utils.toWei('0.01', 'ether'),
       from: account
     });
@@ -247,67 +289,87 @@ const App = {
         that.opponent = player1; //casino
         that.whoseTurn = player1;
         that.subscribe(); //not too sure what this does yet
-        console.log("Join that", that);
       }
 
     });          
-    
-    // contract.methods.join().send({
-    //   value: web3.utils.toWei('0.01', 'ether'),
-    //   from: accounts[0]
-    // }, async (error, transactionHash) => {
-    //     if (error) console.log("JOIN ERROR", error);
-    //     else {
-    //     // console.log("Transaction hash", transactionHash);
-    //       const receipt = await web3.eth.getTransactionReceipt(transactionHash);
-    //       console.log("JOIN CONTRACT DATA", contract);
-    //       console.log(receipt);
-
-    //       contract.methods.player1().call().then((player1) => { 
-    //         if (receipt.status) {
-    //           console.log("Game Officially Joined");
-    //           that.contract = contract;
-    //           that.opponent = player1; //casino
-    //           that.whoseTurn = player1;
-    //           that.subscribe(); //not too sure what this does yet
-    //           console.log("Join that", that);
-    //         }
-
-    //       })
-
           
-    //     }
-    //   }
-    // );        
   },
 
-  fetchContractState: function () {
+
+  fetchContractState: async function () {
     var that = this;
 
     // fetching state from the contract
-    this.contract.methods.state().call({
+    
+    const state = (obj) => {
+      return new Promise((resolve, reject) => {
+        this.contract.methods.state().call(obj, (error, state) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(state);
+          }
+        }) 
+      })
+    };
 
-    }, (error, state) => {
-      if(error) return console.log(error);
-      var seq = state[0];
-      var num = state[1];
-      var whoseTurn = state[2];
-      
-      if (seq > that.seq) {
-        that.seq = seq;
-        that.num = num;
-        that.whoseTurn = whoseTurn;
-        that.pendingMove = null;
-        that.signature = null;
-      }
+    const contractState = await state({});
+    
 
-      console.log("that is", that);
-      console.log("state is", state);
+    let seq = Number(contractState[0]);
+    let num = Number(contractState[1]);
+    let whoseTurn = contractState[2];
 
-    });
+    if (seq > that.seq) {
+      that.seq = seq;
+      that.num = num;
+      that.whoseTurn = whoseTurn;
+      that.pendingMove = null;
+      that.signature = null;
+    }
+
+    const getTimeout = (obj) => {
+      return new Promise((resolve, reject) => {
+        that.contract.methods.timeout().call(obj, (error, timeout) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(timeout);
+          }
+        })
+      })
+    };
+
+    const timeout = await getTimeout({});
+
+    if (timeout === maxuint) {
+      // A value of 2^256-1 indicates no timeout.
+      that.timeout = null;
+      that.latePlayer = null;
+    } else {
+      that.timeout = Number(timeout);
+      that.latePlayer = whoseTurn;
+    }
+
+    const isGameOver = (obj) => {
+      return new Promise((resolve, reject) => {
+        that.contract.methods.gameOver().call(obj, (error, gameOver) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(gameOver);
+          }
+        })
+      })
+    };
+
+    const gameOver = await isGameOver({});
+    that.gameOver = gameOver;
+
   },
 
   updateIfValid: function (move, signature) {
+    console.log("IN HERE WOOOOO");
     if (this.whoseTurn !== this.opponent) {
       console.log("CANT UPDATE 1");
       return;
@@ -317,8 +379,8 @@ const App = {
       return;
     }
 
-    var num = this.num;
-    var seq = this.seq;
+    let num = this.num;
+    let seq = this.seq;
 
     if (this.pendingMove) {
       seq += 1;
@@ -365,25 +427,72 @@ stateHash: function (seq, number) {
   const { web3 } = this;
   return "0x" + web3.utils.soliditySha3(
     // ["address", "uint256", "uint256"],
-    this.contract.address, seq, number
+    this.contract.options.address, seq, number
   ).toString("hex");
 },
 
-move: function (n) {
+// const joinGame = (obj) => {
+//   return new Promise((resolve, reject) => {
+//     contract.methods.join().send(obj, (error, transactionHash) => {
+//       if (error) {
+//         reject(error);
+//       } else {
+//         resolve(transactionHash);
+//       }
+//     })
+//   });
+
+move: async function () {
   const { web3 } = this;
+  console.log("WEB3 is", account);
+  const n = parseInt(document.getElementById('move').value);
   var that = this;
+
   var message = this.stateHash(this.seq + 1, this.num + n);
+
+  // const signMove = (obj) => {
+  //   return new Promise((resolve, reject) => {
+  //     console.log("obj", obj);
+  //     web3.eth.personal.sign(obj, (error, signautre) => {
+  //       if (error) {
+  //         console.log("ERROR", error);
+  //         reject(error);
+  //       } else {
+  //         resolve(signature);
+  //       }
+  //     })
+  //   })
+  // };
 
   if (this.num + n === 21) {//late player 
     this.contractMove(n);
   } else {
-    web3.personal.sign(message, this.account,
+    console.log("I GOT HERE", web3.utils.toChecksumAddress(account));
+    const address = web3.utils.toChecksumAddress(account)
+    // const signature = await signMove({
+    //   message, 
+    //   address
+    // });
+
+    web3.eth.personal.sign(message, address,
       (error, signature) => {
         if (error) return console.log("move error", error);
         console.log("move signature is", signature);
+        pubnub.publish({
+          channel: '21-' + that.contract.address,
+          message: {
+            move: n,
+            signature: signature,
+          },
+        });
+        that.whoseTurn = that.opponent;
+        that.pendingMove = n; 
       });
-    that.whoseTurn = that.opponent;
-    that.pendingMove = n; 
+    console.log("MOVE CONTRACT that", that);
+
+    
+
+    
   }
 },
 
@@ -432,6 +541,10 @@ contractMove: function (n, cb) {
 };
 
 window.App = App;
+let pubnub = new PubNub({
+  publishKey: 'pub-c-bb74265f-0631-4f6f-b34f-67dc66d76cfb',
+  subscribeKey: 'sub-c-5b729cbc-2bd6-11e9-828a-52de7eb65672'
+});
 
 window.addEventListener("load", function() {
   if (window.ethereum) {

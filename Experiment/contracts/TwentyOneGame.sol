@@ -4,6 +4,8 @@ pragma solidity >0.4.9 <0.6.0;
 contract TwentyOneGame {
     address public player1;
     address public player2;
+    address public signer;
+    address public opponent;
     uint256 public betAmount;
     bool public gameOver;
 
@@ -80,7 +82,9 @@ contract TwentyOneGame {
         require(seq >= state.seq, "Sequence number cannot go backwards.");
 
         bytes32 message = prefixed(keccak256(abi.encodePacked(address(this), seq, num)));
-        require(recoverSigner(message, sig) == opponentOf(msg.sender));
+        // signer = recoverSigner(message, sig);
+        // opponent = opponentOf(msg.sender);
+        require(recoverSigner(message, sig) == opponentOf(msg.sender), "cant recover signer");
 
         state.seq = seq;
         state.num = num;
@@ -166,5 +170,9 @@ contract TwentyOneGame {
     // Builds a prefixed hash to mimic the behavior of eth_sign.
     function prefixed(bytes32 hash) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hash));
+    }
+    
+    function contractAddress() public view returns (address) {
+        return address(this);
     }
 }

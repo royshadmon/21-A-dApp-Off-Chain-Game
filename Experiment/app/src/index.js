@@ -7,7 +7,7 @@ import PubNub from 'pubnub';
 
 var GameContract;
 var bytecode = "60806040527fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff600855336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055503460048190555061012c600781905550611937806100876000396000f3fe6080604052600436106100e6576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680630e1da6c3146100eb5780630e76f9db14610102578063238ac9331461012d57806359a5f12d14610184578063701bd985146101db57806370dea79a146102265780637a4558941461025157806393694f6714610268578063b688a363146102bf578063bdb337d1146102c9578063c19d93fb146102f8578063ceec2c9014610369578063d24257c014610458578063d30895e414610483578063ea8a1af0146104da578063f6b4dfb4146104f1575b600080fd5b3480156100f757600080fd5b50610100610548565b005b34801561010e57600080fd5b5061011761068c565b6040518082815260200191505060405180910390f35b34801561013957600080fd5b50610142610692565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561019057600080fd5b506101996106b8565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b3480156101e757600080fd5b50610224600480360360408110156101fe57600080fd5b81019080803560ff169060200190929190803560ff1690602001909291905050506106de565b005b34801561023257600080fd5b5061023b610beb565b6040518082815260200191505060405180910390f35b34801561025d57600080fd5b50610266610bf1565b005b34801561027457600080fd5b5061027d610da5565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b6102c7610dcb565b005b3480156102d557600080fd5b506102de611063565b604051808215151515815260200191505060405180910390f35b34801561030457600080fd5b5061030d611076565b604051808460ff1660ff1681526020018360ff1660ff1681526020018273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168152602001935050505060405180910390f35b34801561037557600080fd5b506104566004803603608081101561038c57600080fd5b81019080803560ff169060200190929190803560ff169060200190929190803590602001906401000000008111156103c357600080fd5b8201836020820111156103d557600080fd5b803590602001918460018302840111640100000000831117156103f757600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f820116905080830192505050505050509192919290803560ff1690602001909291905050506110c8565b005b34801561046457600080fd5b5061046d611370565b6040518082815260200191505060405180910390f35b34801561048f57600080fd5b50610498611376565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b3480156104e657600080fd5b506104ef61139b565b005b3480156104fd57600080fd5b506105066115a0565b604051808273ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b600560009054906101000a900460ff161515156105cd576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252600f8152602001807f47616d652068617320656e6465642e000000000000000000000000000000000081525060200191505060405180910390fd5b60085442101515156105de57600080fd5b6001600560006101000a81548160ff0219169083151502179055506000610629600660000160029054906101000a900473ffffffffffffffffffffffffffffffffffffffff166115a8565b90508073ffffffffffffffffffffffffffffffffffffffff166108fc3073ffffffffffffffffffffffffffffffffffffffff16319081150290604051600060405180830381858888f19350505050158015610688573d6000803e3d6000fd5b5050565b60075481565b600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600560009054906101000a900460ff16151515610763576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252600f8152602001807f47616d652068617320656e6465642e000000000000000000000000000000000081525060200191505060405180910390fd5b600660000160029054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614151561082b576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252600e8152602001807f4e6f7420796f7572207475726e2e00000000000000000000000000000000000081525060200191505060405180910390fd5b60018160ff1610158015610843575060038160ff1611155b15156108dd576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602b8152602001807f4d6f7665206f7574206f662072616e67652e204d75737420626520626574776581526020017f656e203120616e6420332e00000000000000000000000000000000000000000081525060400191505060405180910390fd5b601581600660000160019054906101000a900460ff160160ff161115151561096d576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260158152602001807f4d6f766520776f756c64206578636565642032312e000000000000000000000081525060200191505060405180910390fd5b8160ff16600660000160009054906101000a900460ff1660ff161415156109fc576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252601a8152602001807f496e636f72726563742073657175656e6365206e756d6265722e00000000000081525060200191505060405180910390fd5b80600660000160018282829054906101000a900460ff160192506101000a81548160ff021916908360ff160217905550610a35336115a8565b600660000160026101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055506001600660000160008282829054906101000a900460ff160192506101000a81548160ff021916908360ff1602179055507fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff6008819055506015600660000160019054906101000a900460ff1660ff161415610b68576001600560006101000a81548160ff0219169083151502179055503373ffffffffffffffffffffffffffffffffffffffff166108fc3073ffffffffffffffffffffffffffffffffffffffff16319081150290604051600060405180830381858888f19350505050158015610b66573d6000803e3d6000fd5b505b7f10ac166a969b6ae9b140c9d6b88c6c4e565e4fc22f858bf92f1542535f0f161a338383604051808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1681526020018360ff1660ff1681526020018260ff1660ff168152602001935050505060405180910390a15050565b60085481565b600560009054906101000a900460ff16151515610c76576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252600f8152602001807f47616d652068617320656e6465642e000000000000000000000000000000000081525060200191505060405180910390fd5b610c7f336115a8565b73ffffffffffffffffffffffffffffffffffffffff16600660000160029054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16141515610d6c576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260238152602001807f43616e6e6f7420737461727420612074696d656f7574206f6e20796f7572736581526020017f6c662e000000000000000000000000000000000000000000000000000000000081525060400191505060405180910390fd5b60075442016008819055507f02bdd5174ce27e71542ca96bbba5c2c21920793759d94795d2f17eff6f7f2a0f60405160405180910390a1565b600360009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b600073ffffffffffffffffffffffffffffffffffffffff16600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16141515610e91576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260198152602001807f47616d652068617320616c726561647920737461727465642e0000000000000081525060200191505060405180910390fd5b600560009054906101000a900460ff16151515610f16576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260128152602001807f47616d65207761732063616e63656c65642e000000000000000000000000000081525060200191505060405180910390fd5b60045434141515610f8f576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260118152602001807f57726f6e672062657420616d6f756e742e00000000000000000000000000000081525060200191505060405180910390fd5b33600160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055506000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff16600660000160026101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055507f762f260439bb4be3ef6e4dc2786e2e7bd187d3d80b79057d7a424fe98563e33560405160405180910390a1565b600560009054906101000a900460ff1681565b60068060000160009054906101000a900460ff16908060000160019054906101000a900460ff16908060000160029054906101000a900473ffffffffffffffffffffffffffffffffffffffff16905083565b600660000160009054906101000a900460ff1660ff168460ff161015151561117e576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260248152602001807f53657175656e6365206e756d6265722063616e6e6f7420676f206261636b776181526020017f7264732e0000000000000000000000000000000000000000000000000000000081525060400191505060405180910390fd5b600061124a308686604051602001808473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166c010000000000000000000000000281526014018360ff1660ff167f01000000000000000000000000000000000000000000000000000000000000000281526001018260ff1660ff167f01000000000000000000000000000000000000000000000000000000000000000281526001019350505050604051602081830303815290604052805190602001206117e1565b90506112568184611839565b600260006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555061129f336115a8565b600360006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555084600660000160006101000a81548160ff021916908360ff16021790555083600660000160016101000a81548160ff021916908360ff16021790555033600660000160026101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555061136985836106de565b5050505050565b60045481565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614151561145f576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252601d8152602001807f4f6e6c7920666972737420706c61796572206d61792063616e63656c2e00000081525060200191505060405180910390fd5b600073ffffffffffffffffffffffffffffffffffffffff16600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff16141515611525576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260198152602001807f47616d652068617320616c726561647920737461727465642e0000000000000081525060200191505060405180910390fd5b6001600560006101000a81548160ff0219169083151502179055503373ffffffffffffffffffffffffffffffffffffffff166108fc3073ffffffffffffffffffffffffffffffffffffffff16319081150290604051600060405180830381858888f1935050505015801561159d573d6000803e3d6000fd5b50565b600030905090565b60008073ffffffffffffffffffffffffffffffffffffffff16600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff1614151515611670576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260158152602001807f47616d6520686173206e6f7420737461727465642e000000000000000000000081525060200191505060405180910390fd5b6000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff1614156116ef57600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1690506117dc565b600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff168273ffffffffffffffffffffffffffffffffffffffff16141561176e576000809054906101000a900473ffffffffffffffffffffffffffffffffffffffff1690506117dc565b6040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252600f8152602001807f496e76616c696420706c617965722e000000000000000000000000000000000081525060200191505060405180910390fd5b919050565b60008160405160200180807f19457468657265756d205369676e6564204d6573736167653a0a333200000000815250601c01828152602001915050604051602081830303815290604052805190602001209050919050565b600080600080611848856118c6565b80935081945082955050505060018684848460405160008152602001604052604051808581526020018460ff1660ff1681526020018381526020018281526020019450505050506020604051602081039080840390855afa1580156118b1573d6000803e3d6000fd5b50505060206040510351935050505092915050565b6000806000604184511415156118db57600080fd5b60008060006020870151925060408701519150606087015160001a9050808383955095509550505050919390925056fea165627a7a7230582085f54573cb6d2bde2fe0c00cc536be1d0b660d58a5131d8be8ff51343c0c9ecc0029";
-;
+
 var abi = twentyOneArtifact.abi;
 let util;
 let eth_abi;
@@ -16,6 +16,8 @@ let eth_abi;
 
 let accounts;
 let account;
+
+
 
 // accounts = window.web3.eth.getAccounts();
 // account = accounts[0];
@@ -35,13 +37,41 @@ pubnub.addListener({
   }
 });
 
+// let name;
+// let age;
 
+
+
+//local storage stuff
+// game.firstname = "Roy Shadmon";
+// game.age = 12;
+// myGames['a'] = game;
+
+// let game2 = new Object();
+// game2.firstname = "Noa Shadmon";
+// game2.age = 22;
+// myGames['b'] = game2;
+
+// localStorage.setItem('a', JSON.stringify(game));
+// localStorage.setItem('b', JSON.stringify(game2));
+
+// let obj = localStorage.getItem('a');
+// let obj2 = localStorage.getItem('b');
+// console.log('retrieved', JSON.parse(obj));
+// console.log('retrieved2', JSON.parse(obj2));
+
+
+
+// myGames['b'] = "2df";
+
+// console.log("name", myGames);
+// console.log("name", myGames['b']);
 
 window.App = {
   // web3: null, //i don't think this is needed
   account: null,
-  meta: null, //Metacoin
-  game: null, //metacoin
+  // meta: null, //Metacoin
+  // game: null, //metacoin
   contract: null,
   opponent: null,
   gameOver: false,
@@ -69,24 +99,6 @@ window.App = {
     that.account = accounts[0];
 
     // GameContract = new web3.eth.Contract(abi);
-
-
-
-    // uncomment for metacoin instance
-    // try {
-    //   // get contract instance
-    //   const networkId = await web3.eth.net.getId();
-    //   const deployedNetwork = metaCoinArtifact.networks[networkId];
-    //   this.meta = new web3.eth.Contract(
-    //     metaCoinArtifact.abi,
-    //     deployedNetwork.address,
-    //   );
-
-    //   this.refreshBalance();
-
-    // } catch (error) {
-    //   console.error("Could not connect to contract or chain.");
-    // }
 
   },
 
@@ -149,6 +161,8 @@ window.App = {
         })
       })
     };
+
+    let game = new Object();
     
     let contract = await deployContract({
       from: that.account,
@@ -157,6 +171,8 @@ window.App = {
       value: web3.utils.toWei('0.01', 'ether'),
     });
 
+    localStorage.setItem(contract.options.address, JSON.stringify(game));
+
     console.log("My Contract looks like", contract);
 
     that.contract = contract;
@@ -164,17 +180,20 @@ window.App = {
     that.subscribe();
     console.log("Deployment succeeded. Contract address: ", contract.options.address);
 
-    localStorage.address = contract.options.address;
-    document.getElementById('addy').innerHTML = localStorage.address;
+    sessionStorage.address = contract.options.address;
+    document.getElementById('addy').innerHTML = sessionStorage.address;
     
     that.contract.events.GameStarted(function () {
       that.contract.methods.player2().call().then((opponent) => {
         //update local state to reflect our opponent's address
         //and the fact that it's our turn.
-        
+        let obj = JSON.parse(localStorage.getItem(that.contract.options.address)); 
         that.opponent = opponent;
         that.whoseTurn = that.account;
-        console.log("OPOPO is", opponent, that);
+        obj.opponent = that.opponent;
+        obj.whoseTurn = that.whoseTurn;
+        localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
+        document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;
       }) 
     });
 
@@ -209,15 +228,6 @@ window.App = {
     pubnub.subscribe({
       channels: [channel],
     });
-
-    // pubnub.addListener({
-    //   message: ({ message }) => {
-    //     // console.log("MY MESSAGE IS", message.move);
-    //     App.updateIfValid(message.move, message.signature);
-    //   }
-    // });
-
-
   },
 
 
@@ -228,7 +238,7 @@ window.App = {
     let that = this;
 
     let address = document.getElementById('address').value;
-    window.localStorage.address = address;
+
 
     let contract = new web3.eth.Contract(abi, address);
     // contract.options.address = address;
@@ -240,7 +250,7 @@ window.App = {
         console.log("player2", player2);
         if (that.account === player1) {
           //if we're player 1
-          document.getElementById('addy').innerHTML = window.localStorage.address;
+          // document.getElementById('addy').innerHTML = window.localStorage.address;
           if (player2 !== "0x0000000000000000000000000000000000000000") {
             console.log("Player2 exists", player2);
             //if there's already a player2
@@ -254,7 +264,7 @@ window.App = {
           console.log("Player1 joins", that);
         } else if (that.account === player2) {
           // if we're player 2
-          document.getElementById('addy').innerHTML = window.localStorage.address;
+          // document.getElementById('addy').innerHTML = window.localStorage.address;
           that.opponent = player1;
           that.whoseTurn = player1;
           that.contract = contract;
@@ -284,10 +294,14 @@ window.App = {
 
           if (receipt.status) {
             console.log("Game Officially Joined");
-            document.getElementById('addy').innerHTML = localStorage.address;
+            // document.getElementById('addy').innerHTML = localStorage.address;
             that.contract = contract;
-            that.opponent = player1; //casino
+            that.opponent = player1; 
             that.whoseTurn = player1;
+            let obj = new Object();
+            obj.opponent = player1;
+            obj.whoseTurn = player1;
+            localStorage.setItem(address, JSON.stringify(obj));
             that.subscribe(); //not too sure what this does yet
           }
 
@@ -296,23 +310,7 @@ window.App = {
     })
 
     console.log("ater join that", that);
-
-    
-
-    
-
-    
-
-    // contract.methods.player1().call().then((player1) => { 
-    //   if (receipt.status) {
-    //     console.log("Game Officially Joined");
-    //     that.contract = contract;
-    //     that.opponent = player1; //casino
-    //     that.whoseTurn = player1;
-    //     that.subscribe(); //not too sure what this does yet
-    //   }
-
-    // });          
+       
           
   },
 
@@ -320,8 +318,6 @@ window.App = {
   fetchContractState: async function () {
     let that = this;
 
-    // fetching state from the contract
-    console.log("Fetching this", this);
     const getState = (obj) => {
       return new Promise((resolve, reject) => {
         that.contract.methods.state().call(obj).then((state) => {
@@ -329,28 +325,7 @@ window.App = {
         }) 
       })
     };
-    // this.contract.methods.state(function (err, state) {
-    const contractState = await getState({
-      from: this.account
-    });
-    console.log("THE CONTRACT STATE IS", contractState);
-
-    // this.contract.methods.state().call(function)
-
-    let seq = Number(contractState[0]);
-    let num = Number(contractState[1]);
-    let whoseTurn = contractState[2];
-
-    if (seq > that.seq) {
-      that.seq = seq;
-      that.num = num;
-      that.whoseTurn = whoseTurn;
-      that.pendingMove = null;
-      that.signature = null;
-    }
-
-
-
+    
     const getTimeout = (obj) => {
       return new Promise((resolve, reject) => {
         that.contract.methods.timeout().call(obj, (error, timeout) => {
@@ -363,17 +338,6 @@ window.App = {
       })
     };
 
-    const timeout = await getTimeout({});
-
-    if (timeout === maxuint) {
-      // A value of 2^256-1 indicates no timeout.
-      that.timeout = null;
-      that.latePlayer = null;
-    } else {
-      that.timeout = Number(timeout);
-      that.latePlayer = whoseTurn;
-    }
-
     const isGameOver = (obj) => {
       return new Promise((resolve, reject) => {
         that.contract.methods.gameOver().call(obj, (error, gameOver) => {
@@ -385,9 +349,68 @@ window.App = {
         })
       })
     };
+    
+    const contractState = await getState({
+      from: this.account
+    });
+    console.log("THE CONTRACT STATE IS", contractState);
 
-    const gameOver = await isGameOver({});
-    that.gameOver = gameOver;
+    let seq = Number(contractState[0]);
+    let num = Number(contractState[1]);
+    let whoseTurn = contractState[2];
+
+    if (seq > that.seq) {
+      that.seq = seq;
+      that.num = num;
+      that.whoseTurn = whoseTurn;
+      that.pendingMove = null;
+      that.signature = null;
+      document.getElementById('chainNumber').innerHTML = that.num;
+      document.getElementById('chainSequence').innerHTML = that.seq;
+      document.getElementById('chainWhoseTurn').innerHTML = that.whoseTurn
+    }
+
+    let obj = JSON.parse(localStorage.getItem(this.contract.options.address)); 
+    console.log("obj in fetch", obj, "that in fetch", that);
+    document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;
+    //i want to fetch the opponents most recent messagee but not alter the new messaage. 
+    try {
+      if (obj.seq > that.seq) {
+        that.seq = obj.seq;
+        that.num = obj.num;
+        that.whoseTurn = obj.whoseTurn;
+        that.signature = obj.signature;
+        that.pendingMove = obj.pendingMove;
+        document.getElementById('number').innerHTML = obj.num;
+        document.getElementById('sequence').innerHTML = obj.seq;
+        document.getElementById('signature').innerHTML = obj.signature;
+        document.getElementById('oppAddress').innerHTML = obj.opponent;
+      }      
+    } catch(err) {
+      console.log("Nothing to fetch")
+    }
+    
+
+    // console.log("Fetching object state", obj);
+    // console.log("THAT in fetch", that);
+
+
+
+    // const timeout = await getTimeout({});
+
+    // if (timeout === maxuint) {
+    //   // A value of 2^256-1 indicates no timeout.
+    //   that.timeout = null;
+    //   that.latePlayer = null;
+    // } else {
+    //   that.timeout = Number(timeout);
+    //   that.latePlayer = whoseTurn;
+    // }
+
+    
+
+    // const gameOver = await isGameOver({});
+    // that.gameOver = gameOver;
 
 
   },
@@ -417,12 +440,12 @@ window.App = {
       console.log("CANT UPDATE 3");
       return;
     }
-
+    console.log("MESSAGE INCLUDES", seq, num);
     let message = this.prefixed(this.stateHash(seq, num));
     let signer = "0x" + this.recoverSigner(message, signature);
-
-    console.log("SIGNER IS", "0x"+signer===this.opponent.toLowerCase());
-    console.log("OPPONENT IS", this.opponent.toLowerCase());
+    // console.log("MY SIGNER", signer, "opponent", this.opponent.toLowerCase())
+    // console.log("SIGNER IS", "0x"+signer===this.opponent.toLowerCase());
+    // console.log("OPPONENT IS", this.opponent.toLowerCase());
     if (signer !== this.opponent.toLowerCase()) {
       console.log("CANT UPDATE 4");
       return;
@@ -434,6 +457,23 @@ window.App = {
     this.pendingMove = null;
     this.signature = signature;
     console.log("UPDATED STATE", this);
+
+    //updating local storage
+    let obj = JSON.parse(localStorage.getItem(this.contract.options.address)); 
+    // console.log("My old obj", obj);
+    obj.seq = this.seq;
+    obj.num = this.num;
+    obj.whoseTurn = this.whoseTurn;
+    obj.signature = this.signature;
+    obj.pendingMove = this.pendingMove;
+    localStorage.setItem(this.contract.options.address, JSON.stringify(obj));
+    // console.log("My new obj", obj);
+
+    document.getElementById('number').innerHTML = obj.num;
+    document.getElementById('sequence').innerHTML = obj.seq;
+    document.getElementById('signature').innerHTML = obj.signature;
+    document.getElementById('oppAddress').innerHTML = obj.opponent; 
+    document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;    
   },
 
 
@@ -443,7 +483,7 @@ move: async function () {
 
   const n = parseInt(document.getElementById('move').value);
   let that = this;
-
+  console.log("MOVE IS THIS", this);
   let message = this.stateHash(this.seq + 1, this.num + n);
 
   if (this.num + n === 21) {//late player 
@@ -451,7 +491,7 @@ move: async function () {
   } else {
       //const address = web3.utils.toChecksumAddress(this.account);
       const channel = '21-' + that.contract.options.address;
-      
+      let obj = JSON.parse(localStorage.getItem(that.contract.options.address)); 
       console.log("THE PERSON SIGNING THE MOVE", this.account);
       web3.eth.personal.sign(message, this.account,
         async (error, signature) => {
@@ -468,69 +508,13 @@ move: async function () {
           });
           that.whoseTurn = that.opponent;
           that.pendingMove = n; 
+          obj.pendingMove = that.pendingMove;
+          obj.whoseTurn = that.whoseTurn;
+          localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
+          document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;    
         });
     
   }
-},
-
-sign3: async function () {
-  
-  const seq = 2;
-  const num = 6;
-  const sig = "0x6ecc6aad110b1a82aacb52155404b4511fd0bd1d37450ce88b169799c938a98d6dec397855016b72e5d9ee707a69225ab7376b602e15d489cf24cc05918d23801b";
-  const n = 3;
-  // console.log("sign3 contract", this);
-
-  let message = this.prefixed(this.stateHash(seq, num));
-  let signer = "0x" + this.recoverSigner(message, sig);
-
-  console.log("Try recover signer", message, signer);
-
-  // this.contract.methods.move(
-  //       seq, 
-  //       num
-  //       ).send({
-  //         from: this.account,
-  //         gas: 2000000
-  // }).then((receipt) =>{
-  //   console.log("My receiot", receipt);
-  // });
-  
-  this.contract.methods.moveFromState(
-        seq, 
-        num,
-        sig, 
-        n).send({
-          from: this.account,
-          gas: 2000000
-  }).then((receipt) =>{
-    console.log("My receiot", receipt);
-  });
-
-  // const moveOnChain = (obj) => {
-  //   return new Promise((resolve, reject) => {
-  //     this.contract.methods.moveFromState(
-  //       seq, 
-  //       num,
-  //       sig, 
-  //       n).send(obj).then((error, trxHash) => {
-  //       if (error) {
-  //         reject(error);
-  //       } else {
-  //         resolve(trxHash);
-  //       }
-  //     })`
-  //   })
-  // };
-
-  // const move = await moveOnChain({
-  //   from: this.account,
-  //   gas: 2000000
-  // });
-
-  // console.log("MY MOVE IS", move);
-
-
 },
 
 contractMove: async function (n, cb) {
@@ -566,32 +550,7 @@ contractMove: async function (n, cb) {
   });
   console.log("gas price", gasPrice);
 
-  // async function callback(err, hash) {
-  //   if (err) return console.log("ContractMove callback error", err);
-
-
-  //   const receipt = await web3.eth.getTransactionReceipt(hash);
-  //   console.log("THE RECEIPT", receipt);
-  //   if (receipt.status) {
-  //     console.log("WAS ABLE TO GET CONTRACT MOVE RECEIPT", receipt);
-  //     if (cb) {
-  //       console.log("CB", cb);
-  //     }
-  //     that.fetchContractState();
-  //   }
-  //   else {
-  //     console.log("FAILED TO SUBMIT MOVE");
-  //   }
-  // }
   console.log("In contractMove", this);
-  // const seq = this.seq;
-  // const num = this.num;
-  // const sig = this.signature;
-
-  // const gasAmount = await getGasEstimate({
-  //   from: this.acccount
-  // });
-  // console.log("The gas required is", gasAmount);
 
   const move = await moveOnChain({
     from: this.account,
@@ -616,6 +575,7 @@ window.App = App;
 //     // App.updateIfValid(msg.message.move, msg.message.signature);
 //   },
 // });
+
 
 window.addEventListener("load", async function() {
   if (window.ethereum) {

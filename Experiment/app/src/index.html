@@ -20,37 +20,64 @@
     <label for="move">Move</label><input type="text" id="move">
     <button id="makeMove" class="button button4" onclick="App.move()">Move</button>
 
-    <button id="makeMove" class="button button4" onclick="App.sign3()">Sign test</button>
+    <!-- <button id="fetchState" class="button button4" onclick="App.fetchContractState()">Fetch Contract State</button> -->
 
     <br>
     <p>Your address <strong id="addy">loading...</strong> META</p>
     <br>
 
-<br><b3><b3>
+    <br>
+    <h2>On chain game state</h2>
+    <p>Current Num<strong id="chainNumber">loading...</strong></p>
+    <p>Current Seq<strong id="chainSequence">loading...</strong></p>
+    <p>Whose Turn<strong id="chainWhoseTurn">loading...</strong></p>
+    <br>
 
-    <br><br><br>
-    <h1>MetaCoin — Example Truffle Dapp</h1>
-    <p>You have <strong class="balance">loading...</strong> META</p>
+    <br>
+    <h2>Opponents most recent move</h2>
+    <p>Current Num<strong id="number">loading...</strong></p>
+    <p>Current Seq<strong id="sequence">loading...</strong></p>
+    <p>Opponent Signature<strong id="signature">loading...</strong></p>
+    <p>Opponent Address<strong id="oppAddress">loading...</strong></p>
+    <p>Whose Turn<strong id="whoseTurn">loading...</strong></p>
+    <br>
 
-    <h1>Send MetaCoin</h1>
+<br><br><br>
 
-    <label for="amount">Amount:</label>
-    <input type="text" id="amount" placeholder="e.g. 95" />
-
-    <label for="receiver">To address:</label>
-    <input
-      type="text"
-      id="receiver"
-      placeholder="e.g. 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae"
-    />
-
-    <button onclick="App.sendCoin()">Send MetaCoin</button>
-
-    <p id="status"></p>
-    <p>
-      <strong>Hint:</strong> open the browser developer console to view any
-      errors and warnings.
-    </p>
+<!-- <div>Time left = <span id="timer"></span></div> -->
+    
     <script src="index.js"></script>
   </body>
 </html>
+
+
+
+<!-- https://codepen.io/ishanbakshi/pen/pgzNMv -->
+<!-- <script type="text/javascript">
+  let startTime = 00 + ":" + 05
+  document.getElementById('timer').innerHTML = startTime;
+  startTimer();
+
+  function startTimer() {
+    var presentTime = document.getElementById('timer').innerHTML;
+    var timeArray = presentTime.split(/[:]+/);
+    var m = timeArray[0];
+    var s = checkSecond((timeArray[1] - 1));
+    if(s==59){m=m-1}
+    if(m<0){
+      alert('timer completed');
+      return;
+    }
+    
+    document.getElementById('timer').innerHTML =
+      m + ":" + s;
+    setTimeout(startTimer, 1000);
+  }
+
+
+  function checkSecond(sec) {
+    if (sec < 10 && sec >= 0) {sec = "0" + sec}; // add zero in front of numbers < 10
+    if (sec < 0) {sec = "59"};
+    return sec;
+  }
+</script> -->

@@ -33,7 +33,17 @@ let pubnub = new PubNub({
 pubnub.addListener({
   message: ({ message }) => {
     // console.log("MY MESSAGE IS", message.move);
-    App.updateIfValid(message.move, message.signature);
+    try {
+      if (message.timeout) {
+        App.startTimer()
+      }
+      else {
+        App.updateIfValid(message.move, message.signature);
+      }
+    } catch(err) {
+      console.log("error is", err);
+    }
+    // App.updateIfValid(message.move, message.signature);
   }
 });
 
@@ -125,6 +135,74 @@ window.App = {
       [this.contract.options.address, seq, number]
     ).toString("hex");
   },
+
+  startTimeout: async function () {
+    let that = this;
+
+    let address = document.getElementById('address').value;
+    let contract = new web3.eth.Contract(abi, address);
+
+    const timeout = (obj) => {
+      return new Promise((resolve, reject) => {
+        contract.methods.startTimeout().send(obj, (error, transactionHash) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(transactionHash);
+          }
+        })
+      })
+    };
+
+    const transactionHash = await timeout({
+      from: that.account
+    });
+
+    const message = {
+      timeout: true,
+      timeLeft: 5,
+    };
+    
+    pubnub.publish({
+      channel: channel,
+      message
+    });
+
+
+  },
+
+  //https://codepen.io/ishanbakshi/pen/pgzNMv
+  startTimer: function() {
+    console.log("THIS", this);
+    let that = this;
+    let item = document.getElementById('timeout');
+    // var minutes = 05.toString();
+    // var seconds = 00.toString();
+    let startTime = "05:00"
+    document.getElementById('timer').innerHTML = startTime;
+    item.className = 'unhidden' ;
+    this.value = 'hide';
+    document.getElementById('timeoutButton').disabled = true;
+    timer();
+    function checkSecond(sec) {
+      if (sec < 10 && sec >= 0) {sec = "0" + sec}; // add zero in front of numbers < 10
+      if (sec < 0) {sec = "59"};
+      return sec;
+    }
+    function timer() {
+      var presentTime = document.getElementById('timer').innerHTML;
+        var timeArray = presentTime.split(/[:]+/);
+        var m = timeArray[0];
+        var s = checkSecond((timeArray[1] - 1));
+        if(s==59){m=m-1}
+        //if(m<0){alert('timer completed')}
+        
+        document.getElementById('timer').innerHTML =
+          m + ":" + s;
+        setTimeout(timer, 1000);
+    }
+  },
+
 
   sign: async function() {
     document.getElementById('addy').innerHTML = localStorage.address;

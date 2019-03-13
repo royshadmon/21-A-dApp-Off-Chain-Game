@@ -320,7 +320,7 @@ window.App = {
       from: that.account,
       gas: 2000000,
       gasPrice: 3000000000,
-      value: web3.utils.toWei('2.0', 'ether'),
+      value: web3.utils.toWei('0.1', 'ether'),
     });
 
     localStorage.setItem(contract.options.address, JSON.stringify(game));
@@ -330,9 +330,9 @@ window.App = {
     that.subscribe();
     console.log("Deployment succeeded. Contract address: ", contract.options.address);
 
-    // sessionStorage.address = contract.options.address;
     document.getElementById('addy').innerHTML = contract.options.address;
-    
+    document.getElementById('cancelContract').style.display = 'block';
+
     that.contract.events.GameStarted(function () {
       that.contract.methods.player2().call().then((opponent) => {
         //update local state to reflect our opponent's address
@@ -345,9 +345,30 @@ window.App = {
         localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
         document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;
         document.getElementById('timeoutButton').disabled = false;
+        document.getElementById('cancelContract').style.display = 'none';
       }) 
     });
+  },
 
+  cancelGame: async function() {
+    let that = this;
+
+    const cancel = (obj) => {
+      return new Promise((resolve, reject) => {
+        this.contract.methods.cancel().send(obj, (error, cancellation) => {
+          if (error) {
+            reject(error);
+          }
+          else {
+            resolve(cancellation);
+          }
+        })
+      })
+    };
+
+    await cancel({
+      from: that.account
+    });
 
   },
 
@@ -407,6 +428,9 @@ window.App = {
             obj.opponent = that.opponent;
             localStorage.setItem(address, JSON.stringify(obj));
           }
+          if (player2 === "0x0000000000000000000000000000000000000000") {
+            document.getElementById('cancelContract').style.display = 'block';
+          }
           that.contract = contract;
           that.fetchContractState();
           that.subscribe();
@@ -434,7 +458,7 @@ window.App = {
           };
 
           const transactionHash = await joinGame({
-            value: web3.utils.toWei('2.0', 'ether'),
+            value: web3.utils.toWei('0.1', 'ether'),
             from: that.account
           });
 
@@ -449,6 +473,7 @@ window.App = {
             obj.opponent = player1;
             obj.whoseTurn = player1;
             localStorage.setItem(address, JSON.stringify(obj));
+            document.getElementById('cancelContract').style.display = 'none';
             document.getElementById('addy').innerHTML = address;
             that.subscribe(); 
           }

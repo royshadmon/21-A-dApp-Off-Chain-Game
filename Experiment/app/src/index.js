@@ -22,8 +22,10 @@ let account;
 // accounts = window.web3.eth.getAccounts();
 // account = accounts[0];
 
-let maxuint = web3.toBigNumber(2).pow(256).sub(1);
-console.log("max", maxuint);
+let maxuint = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
+// var maxuint2 = web3.toBigNumber(2).pow(256).sub(1);
+// console.log("max", maxuint, maxuint2, web3);
+// console.log(maxuint === maxuint2);
 
 let pubnub = new PubNub({
   publishKey: 'pub-c-bb74265f-0631-4f6f-b34f-67dc66d76cfb',
@@ -35,7 +37,11 @@ pubnub.addListener({
     // console.log("MY MESSAGE IS", message.move);
     try {
       if (message.timeout) {
-        App.startTimer()
+        console.log("RECEIVED MESSAGE", message);
+        App.fetchContractState();
+      }
+      else if (message.update) {
+        App.fetchContractState();
       }
       else {
         App.updateIfValid(message.move, message.signature);
@@ -47,35 +53,8 @@ pubnub.addListener({
   }
 });
 
-// let name;
-// let age;
+document.getElementById('timeoutButton').disabled = true;
 
-
-
-//local storage stuff
-// game.firstname = "Roy Shadmon";
-// game.age = 12;
-// myGames['a'] = game;
-
-// let game2 = new Object();
-// game2.firstname = "Noa Shadmon";
-// game2.age = 22;
-// myGames['b'] = game2;
-
-// localStorage.setItem('a', JSON.stringify(game));
-// localStorage.setItem('b', JSON.stringify(game2));
-
-// let obj = localStorage.getItem('a');
-// let obj2 = localStorage.getItem('b');
-// console.log('retrieved', JSON.parse(obj));
-// console.log('retrieved2', JSON.parse(obj2));
-
-
-
-// myGames['b'] = "2df";
-
-// console.log("name", myGames);
-// console.log("name", myGames['b']);
 
 window.App = {
   // web3: null, //i don't think this is needed
@@ -99,7 +78,6 @@ window.App = {
     const { web3 } = this;
 
     const that = this;
-
 
     util = require('ethereumjs-util');
     eth_abi = require('ethereumjs-abi');
@@ -129,95 +107,191 @@ window.App = {
   },
 
   stateHash: function (seq, number) {
-    console.log("MOVEE Signing contract address", this.contract.options.address);
     return "0x" + eth_abi.soliditySHA3(
       ["address", "uint8", "uint8"],
       [this.contract.options.address, seq, number]
     ).toString("hex");
   },
 
-  startTimeout: async function () {
-    let that = this;
+  // beginTimeout: async function () {
+  //   this.fetchContractState();
+  //   let startTime = "05:00"
+  //   document.getElementById('timer').innerHTML = startTime;
+  //   let item = document.getElementById('timeout');
+  //   item.className = 'unhidden' ;
+  //   this.value = 'hide';
+  //   document.getElementById('timeoutButton').disabled = true;
+  //   startTimer();
 
-    let address = document.getElementById('address').value;
-    let contract = new web3.eth.Contract(abi, address);
+  //   function checkSecond(sec) {
+  //     if (sec < 10 && sec >= 0) {sec = "0" + sec}; // add zero in front of numbers < 10
+  //     if (sec < 0) {sec = "59"};
+  //     return sec;
+  //   }
+  //   function startTimer() {
+  //       let presentTime = document.getElementById('timer').innerHTML;
+  //       let timeArray = presentTime.split(/[:]+/);
+  //       let m = timeArray[0];
+  //       let s = checkSecond((timeArray[1] - 1));
+  //       if(s==59){m=m-1}
+  //       if(m<0){
+  //         alert('timer completed')
+  //         clearTimeout();
+  //       }
+        
+  //       document.getElementById('timer').innerHTML =
+  //         m + ":" + s;
+  //       setTimeout(startTimer, 1000);
+  //   }
 
-    const timeout = (obj) => {
-      return new Promise((resolve, reject) => {
-        contract.methods.startTimeout().send(obj, (error, transactionHash) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(transactionHash);
-          }
-        })
-      })
-    };
+  // },
 
-    const transactionHash = await timeout({
-      from: that.account
-    });
+  //https://codepen.io/ishanbakshi/pen/pgzNMv
+  // startTimeout: async function() {
+  //   let that = this;
 
-    const message = {
-      timeout: true,
-      timeLeft: 5,
-    };
+  //   let address = document.getElementById('address').value;
+  //   const channel = '21-' + that.contract.options.address;
+
+  //   const timeout = (obj) => {
+  //     return new Promise((resolve, reject) => {
+  //       that.contract.methods.startTimeout().send(obj, (error, transactionHash) => {
+  //         if (error) {
+  //           reject(error);
+  //         } else {
+  //           resolve(transactionHash);
+  //         }
+  //       })
+  //     })
+  //   };
+
+  //   const transactionHash = await timeout({
+  //     from: that.account
+  //   });
+
+  //   const message = {
+  //     timeout: true,
+  //     timeLeft: 5,
+  //   };
     
+  //   pubnub.publish({
+  //     channel: channel,
+  //     message
+  //   });
+
+    
+  //   let startTime = "05:00"
+  //   document.getElementById('timer').innerHTML = startTime;
+  //   let item = document.getElementById('timeout');
+  //   item.className = 'unhidden' ;
+  //   this.value = 'hide';
+  //   document.getElementById('timeoutButton').disabled = true;
+  //   startTimer();
+
+  //   function checkSecond(sec) {
+  //     if (sec < 10 && sec >= 0) {sec = "0" + sec}; // add zero in front of numbers < 10
+  //     if (sec < 0) {sec = "59"};
+  //     return sec;
+  //   }
+  //   function startTimer() {
+  //       let presentTime = document.getElementById('timer').innerHTML;
+  //       let timeArray = presentTime.split(/[:]+/);
+  //       let m = timeArray[0];
+  //       let s = checkSecond((timeArray[1] - 1));
+  //       if(s==59){m=m-1}
+  //       if(m<0){
+  //         alert('timer completed')
+  //         clearTimeout();
+  //       }
+        
+  //       document.getElementById('timer').innerHTML =
+  //         m + ":" + s;
+  //       setTimeout(startTimer, 1000);
+  //   }
+  // },
+
+  moveFromStateAndStartTimeout: async function() {
+    let that = this;
+    
+    async function startTimeout() {
+      console.log("yes");
+      const timeout = (obj) => {
+        return new Promise((resolve, reject) => {
+          that.contract.methods.startTimeout().send(obj, (error, transactionHash) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(transactionHash);
+            }
+          })
+        })
+      };
+      
+      const transactionHash = await timeout({
+        from: that.account
+      });
+
+      if (transactionHash) {
+        console.log("TIMEOUT STARTED", transactionHash);
+      }
+      else {
+        console.log("TIMEOUT FAILED", transactionHash); 
+      }
+      that.fetchContractState();
+    }
+
+    async function chainMove(seq, pendingMove) {
+      const move = (obj) => {
+        return new Promise((resolve, reject) => {
+          that.contract.methods.move(seq, pendingMove).send(obj, (error, transactionHash) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(transactionHash);
+            }
+          })
+        })
+      };
+
+      const transactionHash = await move({
+        from: that.account
+      });
+
+      const message = {
+        timeout: true
+      };
+      let channel = '21-' + that.contract.options.address;
+      await pubnub.publish({
+        channel: channel,
+        message
+      });
+
+      that.fetchContractState();
+    }
+
+    console.log("THIS IS IS ", this);
+    // this.signature means the other user has sent them a move
+    if (this.pendingMove && this.signature) {
+      console.log("Newest move is on-chain", this);
+      this.contractMove(this.pendingMove);
+      await startTimeout();
+    }
+    else {  
+      // nothing
+    }
+    await this.fetchContractState();
+  },
+
+  sendUpdateMessage: function () {
+    const message = {
+      update: true
+    };
+    let channel = '21-' + this.contract.options.address;
     pubnub.publish({
       channel: channel,
       message
     });
-
-
-  },
-
-  //https://codepen.io/ishanbakshi/pen/pgzNMv
-  startTimer: function() {
-    console.log("THIS", this);
-    let that = this;
-    let item = document.getElementById('timeout');
-    // var minutes = 05.toString();
-    // var seconds = 00.toString();
-    let startTime = "05:00"
-    document.getElementById('timer').innerHTML = startTime;
-    item.className = 'unhidden' ;
-    this.value = 'hide';
-    document.getElementById('timeoutButton').disabled = true;
-    timer();
-    function checkSecond(sec) {
-      if (sec < 10 && sec >= 0) {sec = "0" + sec}; // add zero in front of numbers < 10
-      if (sec < 0) {sec = "59"};
-      return sec;
-    }
-    function timer() {
-      var presentTime = document.getElementById('timer').innerHTML;
-        var timeArray = presentTime.split(/[:]+/);
-        var m = timeArray[0];
-        var s = checkSecond((timeArray[1] - 1));
-        if(s==59){m=m-1}
-        //if(m<0){alert('timer completed')}
-        
-        document.getElementById('timer').innerHTML =
-          m + ":" + s;
-        setTimeout(timer, 1000);
-    }
-  },
-
-
-  sign: async function() {
-    document.getElementById('addy').innerHTML = localStorage.address;
-    const { web3 } = this;
-    const state = {
-      winner: "Roy",
-      loser: "dog"
-    }
-    const sig = await web3.eth.personal.sign("state", this.account);
-    console.log("sign message", sig);
-
-    const recover = await web3.eth.personal.ecRecover("state", sig);
-    console.log('who signed', recover);
-
-  },
+  }, 
 
   //this function starts a new instance of a game
   startGame: async function() {
@@ -246,20 +320,18 @@ window.App = {
       from: that.account,
       gas: 2000000,
       gasPrice: 3000000000,
-      value: web3.utils.toWei('0.01', 'ether'),
+      value: web3.utils.toWei('2.0', 'ether'),
     });
 
     localStorage.setItem(contract.options.address, JSON.stringify(game));
-
-    console.log("My Contract looks like", contract);
 
     that.contract = contract;
 
     that.subscribe();
     console.log("Deployment succeeded. Contract address: ", contract.options.address);
 
-    sessionStorage.address = contract.options.address;
-    document.getElementById('addy').innerHTML = sessionStorage.address;
+    // sessionStorage.address = contract.options.address;
+    document.getElementById('addy').innerHTML = contract.options.address;
     
     that.contract.events.GameStarted(function () {
       that.contract.methods.player2().call().then((opponent) => {
@@ -272,6 +344,7 @@ window.App = {
         obj.whoseTurn = that.whoseTurn;
         localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
         document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;
+        document.getElementById('timeoutButton').disabled = false;
       }) 
     });
 
@@ -320,37 +393,34 @@ window.App = {
 
     let contract = new web3.eth.Contract(abi, address);
     // contract.options.address = address;
-    console.log("THAT", that);
     // fetch player 1
     contract.methods.player1().call(async function (err, player1) {
-      console.log("player1 is", player1);
       contract.methods.player2().call(async function (err, player2) {
-        console.log("player2", player2);
         if (that.account === player1) {
           //if we're player 1
-          // document.getElementById('addy').innerHTML = window.localStorage.address;
+          document.getElementById('addy').innerHTML = address;
           if (player2 !== "0x0000000000000000000000000000000000000000") {
-            console.log("Player2 exists", player2);
             //if there's already a player2
             that.whoseTurn = that.account;
             that.opponent = player2;
+            let obj = JSON.parse(localStorage.getItem(address)); 
+            obj.opponent = that.opponent;
+            localStorage.setItem(address, JSON.stringify(obj));
           }
-
           that.contract = contract;
           that.fetchContractState();
           that.subscribe();
-          console.log("Player1 joins", that);
         } else if (that.account === player2) {
           // if we're player 2
           // document.getElementById('addy').innerHTML = window.localStorage.address;
           that.opponent = player1;
           that.whoseTurn = player1;
           that.contract = contract;
+          document.getElementById('addy').innerHTML = address;
           that.fetchContractState();
           that.subscribe();
         } else {
           //if we're neither player, let's try to join.
-          console.log("We're neither");
           const joinGame = (obj) => {
             return new Promise((resolve, reject) => {
               contract.methods.join().send(obj, (error, transactionHash) => {
@@ -364,14 +434,13 @@ window.App = {
           };
 
           const transactionHash = await joinGame({
-            value: web3.utils.toWei('0.01', 'ether'),
+            value: web3.utils.toWei('2.0', 'ether'),
             from: that.account
           });
 
           const receipt = await web3.eth.getTransactionReceipt(transactionHash);
 
           if (receipt.status) {
-            console.log("Game Officially Joined");
             // document.getElementById('addy').innerHTML = localStorage.address;
             that.contract = contract;
             that.opponent = player1; 
@@ -380,15 +449,14 @@ window.App = {
             obj.opponent = player1;
             obj.whoseTurn = player1;
             localStorage.setItem(address, JSON.stringify(obj));
-            that.subscribe(); //not too sure what this does yet
+            document.getElementById('addy').innerHTML = address;
+            that.subscribe(); 
           }
 
         }
       })
     })
-
-    console.log("ater join that", that);
-       
+    document.getElementById('timeoutButton').disabled = false;
           
   },
 
@@ -431,7 +499,6 @@ window.App = {
     const contractState = await getState({
       from: this.account
     });
-    console.log("THE CONTRACT STATE IS", contractState);
 
     let seq = Number(contractState[0]);
     let num = Number(contractState[1]);
@@ -446,10 +513,11 @@ window.App = {
       document.getElementById('chainNumber').innerHTML = that.num;
       document.getElementById('chainSequence').innerHTML = that.seq;
       document.getElementById('chainWhoseTurn').innerHTML = that.whoseTurn
+      document.getElementById('oppAddress').innerHTML = that.opponent;
     }
 
     let obj = JSON.parse(localStorage.getItem(this.contract.options.address)); 
-    console.log("obj in fetch", obj, "that in fetch", that);
+    
     document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;
     //i want to fetch the opponents most recent messagee but not alter the new messaage. 
     try {
@@ -472,24 +540,33 @@ window.App = {
     // console.log("Fetching object state", obj);
     // console.log("THAT in fetch", that);
 
-
-
+    // console.log("web3", this);
+    
+    // const BN = this.web3.utils.BN;
+    // let maxxx = new BN('115792089237316195423570985008687907853269984665640564039457584007913129639935');
+    // console.log("MAXXX", maxxx);
     // const timeout = await getTimeout({});
-
-    // if (timeout === maxuint) {
+    // console.log("TIMEOUT", timeout, "MAXUINT", maxxx);
+    // console.log(timeout === maxxx);
+    // if (String(timeout) === String(maxxx)) {
     //   // A value of 2^256-1 indicates no timeout.
     //   that.timeout = null;
     //   that.latePlayer = null;
+    //   obj.timeout = that.timeout;
+    //   obj.latePlayer = that.latePlayer;
     // } else {
     //   that.timeout = Number(timeout);
     //   that.latePlayer = whoseTurn;
+    //   obj.timeout = that.timeout;
+    //   obj.latePlayer = that.latePlayer;
     // }
 
     
 
-    // const gameOver = await isGameOver({});
-    // that.gameOver = gameOver;
-
+    const gameOver = await isGameOver({});
+    that.gameOver = gameOver;
+    obj.gameOver = that.gameOver;
+    localStorage.setItem(this.contract.options.address, JSON.stringify(obj));
 
   },
 
@@ -518,12 +595,9 @@ window.App = {
       console.log("CANT UPDATE 3");
       return;
     }
-    console.log("MESSAGE INCLUDES", seq, num);
     let message = this.prefixed(this.stateHash(seq, num));
     let signer = "0x" + this.recoverSigner(message, signature);
-    // console.log("MY SIGNER", signer, "opponent", this.opponent.toLowerCase())
-    // console.log("SIGNER IS", "0x"+signer===this.opponent.toLowerCase());
-    // console.log("OPPONENT IS", this.opponent.toLowerCase());
+
     if (signer !== this.opponent.toLowerCase()) {
       console.log("CANT UPDATE 4");
       return;
@@ -534,7 +608,6 @@ window.App = {
     this.whoseTurn = this.account;
     this.pendingMove = null;
     this.signature = signature;
-    console.log("UPDATED STATE", this);
 
     //updating local storage
     let obj = JSON.parse(localStorage.getItem(this.contract.options.address)); 
@@ -551,30 +624,42 @@ window.App = {
     document.getElementById('sequence').innerHTML = obj.seq;
     document.getElementById('signature').innerHTML = obj.signature;
     document.getElementById('oppAddress').innerHTML = obj.opponent; 
-    document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;    
+    document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;  
+    
   },
 
 
 
-move: async function () {
+move: async function (n) {
   const { web3 } = this;
 
-  const n = parseInt(document.getElementById('move').value);
+  // const n = parseInt(document.getElementById('move').value);
+  // const checked = document.getElementById('onChain').checked;
   let that = this;
-  console.log("MOVE IS THIS", this);
   let message = this.stateHash(this.seq + 1, this.num + n);
-
-  if (this.num + n === 21) {//late player 
+  let obj = JSON.parse(localStorage.getItem(that.contract.options.address)); 
+  console.log("MOVEE THAT", that);
+  if (this.num + n === 21) { 
     this.contractMove(n);
-  } else {
+  } 
+  // else if (that.latePlayer){
+  //     this.contractMove(n);
+  //     that.latePlayer = null;
+  //     obj.latePlayer = null;
+  //     localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
+  //     that.sendUpdateMessage();
+  //   } 
+  else {
       //const address = web3.utils.toChecksumAddress(this.account);
       const channel = '21-' + that.contract.options.address;
-      let obj = JSON.parse(localStorage.getItem(that.contract.options.address)); 
-      console.log("THE PERSON SIGNING THE MOVE", this.account);
+      
       web3.eth.personal.sign(message, this.account,
         async (error, signature) => {
           if (error) return console.log("move error", error);
           
+          // if (checked) { //if user wants on chain transaction
+          //   that.contractMove(that.pendingMove);
+          // }
           const message = {
             move: n,
             signature: signature
@@ -589,27 +674,26 @@ move: async function () {
           obj.pendingMove = that.pendingMove;
           obj.whoseTurn = that.whoseTurn;
           localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
-          document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;    
+          document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;   
         });
-    
   }
 },
+
 
 contractMove: async function (n, cb) {
   var that = this;
 
-  const getGasEstimate = (obj) => {
-    return new Promise((resolve, reject) => {
-      this.contract.methods.moveFromState(
-        this.seq, 
-        this.num,
-        this.signature, 
-        n).estimateGas(obj).then((gasAmount) => {
-          resolve(gasAmount);
-      })
-    })
-  };
-
+  // const getGasEstimate = (obj) => {
+  //   return new Promise((resolve, reject) => {
+  //     this.contract.methods.moveFromState(
+  //       this.seq, 
+  //       this.num,
+  //       this.signature, 
+  //       n).estimateGas(obj).then((gasAmount) => {
+  //         resolve(gasAmount);
+  //     })
+  //   })
+  // };
 
   const moveOnChain = (obj) => {
     return new Promise((resolve, reject) => {
@@ -623,19 +707,14 @@ contractMove: async function (n, cb) {
     })
   };
 
-  const gasPrice = getGasEstimate({
-    from: this.account
-  });
-  console.log("gas price", gasPrice);
-
-  console.log("In contractMove", this);
+  // const gasPrice = getGasEstimate({
+  //   from: this.account
+  // });
 
   const move = await moveOnChain({
     from: this.account,
     gas: 2000000
   });
-
-  console.log("done with move", move);
 
 },
 

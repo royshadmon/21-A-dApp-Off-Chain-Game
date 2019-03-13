@@ -9,6 +9,7 @@
       margin-bottom: 12px;
     }
   </style>
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   <body>
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.20.3.min.js"></script>
     <br><br><br>
@@ -16,9 +17,17 @@
     <button id="startContract" class="button button4" onclick="App.join()">Join Existing Game</button>
     <br>
     <label for="address">Address</label><input type="text" id="address">
+    <br>
+    <!-- <label for="move">Move</label><input type="text" id="move"> -->
+    <button id="makeMove" class="w3-button w3-circle w3-black"" onclick="App.move(1)">+1</button>
+    <button id="makeMove" class="w3-button w3-circle w3-black"" onclick="App.move(2)">+2</button>
+    <button id="makeMove" class="w3-button w3-circle w3-black"" onclick="App.move(3)">+3</button>
+    <!-- <button id="fetch" class="button button4" onclick="App.fetchContractState()">Fetch State</button> -->
 
-    <label for="move">Move</label><input type="text" id="move">
-    <button id="makeMove" class="button button4" onclick="App.move()">Move</button>
+
+
+    <!-- <input type="checkbox" id="onChain">Check for on Chain Move -->
+    <!-- <button id="moveFromState" class="button button4" onclick="App.nextMoveOnChain()">Move on Chain</button> -->
 
     <!-- <button id="fetchState" class="button button4" onclick="App.fetchContractState()">Fetch Contract State</button> -->
 
@@ -45,7 +54,7 @@
 <br><br><br>
 
 <!-- <div>Time left = <span id="timer"></span></div> -->
-    <button id="timeoutButton" onclick="App.startTimer()">Timer</button>
+    <button id="timeoutButton" onclick="App.moveFromStateAndStartTimeout()">Start Timeout</button>
     <div class="hidden" id="timeout">
       <p>Time <strong id="timer">loading...</strong></p>
     </div>

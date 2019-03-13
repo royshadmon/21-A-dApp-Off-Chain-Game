@@ -13,15 +13,17 @@
   <body>
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.20.3.min.js"></script>
     <br><br><br>
-    <button id="startContract" class="button button4" onclick="App.startGame()">Start New Game</button> or
-    <button id="startContract" class="button button4" onclick="App.join()">Join Existing Game</button>
+    <button id="startContract" class="w3-button w3-round-xlarge w3-indigo" onclick="App.startGame()">Start New Game</button> or
+    <button id="startContract" class="w3-button w3-round-xlarge w3-green" onclick="App.join()">Join Existing Game</button>
     <br>
-    <label for="address">Address</label><input type="text" id="address">
+    <form class="w3-container w3-light-grey">
+      <label for="address">Address</label><input type="text" class="w3-input w3-border" id="address">
+    </form>
     <br>
     <!-- <label for="move">Move</label><input type="text" id="move"> -->
-    <button id="makeMove" class="w3-button w3-circle w3-black"" onclick="App.move(1)">+1</button>
-    <button id="makeMove" class="w3-button w3-circle w3-black"" onclick="App.move(2)">+2</button>
-    <button id="makeMove" class="w3-button w3-circle w3-black"" onclick="App.move(3)">+3</button>
+    <button id="makeMove" class="w3-button w3-circle w3-teal"" onclick="App.move(1)">+1</button>
+    <button id="makeMove" class="w3-button w3-circle w3-teal"" onclick="App.move(2)">+2</button>
+    <button id="makeMove" class="w3-button w3-circle w3-teal"" onclick="App.move(3)">+3</button>
     <!-- <button id="fetch" class="button button4" onclick="App.fetchContractState()">Fetch State</button> -->
 
 
@@ -32,23 +34,23 @@
     <!-- <button id="fetchState" class="button button4" onclick="App.fetchContractState()">Fetch Contract State</button> -->
 
     <br>
-    <p>Your address <strong id="addy">loading...</strong> META</p>
+    <p>Contract Address <strong id="addy">loading...</strong></p>
     <br>
 
     <br>
     <h2>On chain game state</h2>
-    <p>Current Num<strong id="chainNumber">loading...</strong></p>
-    <p>Current Seq<strong id="chainSequence">loading...</strong></p>
-    <p>Whose Turn<strong id="chainWhoseTurn">loading...</strong></p>
+    <p>Current Num<strong id="chainNumber"> loading...</strong></p>
+    <p>Current Seq<strong id="chainSequence"> loading...</strong></p>
+    <p>Whose Turn<strong id="chainWhoseTurn"> loading...</strong></p>
     <br>
 
     <br>
     <h2>Opponents most recent move</h2>
-    <p>Current Num<strong id="number">loading...</strong></p>
-    <p>Current Seq<strong id="sequence">loading...</strong></p>
-    <p>Opponent Signature<strong id="signature">loading...</strong></p>
-    <p>Opponent Address<strong id="oppAddress">loading...</strong></p>
-    <p>Whose Turn<strong id="whoseTurn">loading...</strong></p>
+    <p>Current Num<strong id="number"> loading...</strong></p>
+    <p>Current Seq<strong id="sequence"> loading...</strong></p>
+    <p>Opponent Signature<strong id="signature"> loading...</strong></p>
+    <p>Opponent Address<strong id="oppAddress"> loading...</strong></p>
+    <p>Whose Turn<strong id="whoseTurn"> loading...</strong></p>
     <br>
 
 <br><br><br>

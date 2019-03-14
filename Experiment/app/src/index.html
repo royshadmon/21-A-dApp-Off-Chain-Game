@@ -8,9 +8,15 @@
       display: block;
       margin-bottom: 12px;
     }
+/*    body {
+      visibility: hidden;
+    }*/
   </style>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+  
   <body>
+    <h2 id="noMask" style="display:none">You must connect to MetaMask</h2>
+    <div id="functionality" style="display:none">
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.20.3.min.js"></script>
     <br><br><br>
     <button id="startContract" class="w3-button w3-round-xlarge w3-indigo" onclick="App.startGame()">Start New Game</button> or
@@ -62,6 +68,7 @@
       <p>Time <strong id="timer">loading...</strong></p>
     </div>
     <script src="index.js"></script>
+  </div>
   </body>
 </html>
 

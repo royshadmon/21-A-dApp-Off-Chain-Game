@@ -39,10 +39,12 @@ pubnub.addListener({
       if (message.timeout) {
         console.log("RECEIVED MESSAGE timeout", message);
         App.updateLatePlayer(message.player);
+        App.fetchContractState();
       }
       else if (message.noLatePlayer) {
         console.log("RECEIVED MESSAGE noLatePlayer", message);
         App.updateLatePlayer(NaN);
+        App.fetchContractState();
       }
       else {
         console.log("RECEIVED MESSAGE updateIfValid", message);
@@ -87,6 +89,8 @@ window.App = {
     // get accounts
     accounts = await web3.eth.getAccounts();
     that.account = accounts[0];
+
+
 
     // GameContract = new web3.eth.Contract(abi);
 
@@ -265,9 +269,9 @@ window.App = {
     // this.signature means the other user has sent them a move
     if (this.pendingMove && !(this.signature)) {
       console.log("Newest move is on-chain", this);
-      await that.chainMove(this.seq, this.pendingMove);
+      await this.chainMove(this.seq, this.pendingMove);
     }
-    else {  
+    else if (this.pendingMove && (this.signature)){  
       await this.contractMove(this.pendingMove);
       // nothing
     }
@@ -314,6 +318,8 @@ window.App = {
       channel: channel,
       message
     });
+
+    this.fetchContractState();
   }, 
 
   sendTimeoutMessage: function () {
@@ -331,7 +337,11 @@ window.App = {
   //this function starts a new instance of a game
   startGame: async function() {
     const { web3 } = this;
-    var that = this;
+    let that = this;
+
+    function checkState() {
+      that.fetchContractState();
+    }
 
     GameContract = new web3.eth.Contract(abi);
 
@@ -367,7 +377,7 @@ window.App = {
 
     document.getElementById('addy').innerHTML = contract.options.address;
     document.getElementById('cancelContract').style.display = 'block';
-
+    
     that.contract.events.GameStarted(function () {
       that.contract.methods.player2().call().then((opponent) => {
         //update local state to reflect our opponent's address
@@ -381,6 +391,7 @@ window.App = {
         document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;
         document.getElementById('timeoutButton').disabled = false;
         document.getElementById('cancelContract').style.display = 'none';
+        setInterval(checkState, 10*1000);
       }) 
     });
   },
@@ -444,6 +455,10 @@ window.App = {
     
     let that = this;
 
+    function checkState() {
+      that.fetchContractState();
+    }
+
     let address = document.getElementById('address').value;
 
 
@@ -454,6 +469,7 @@ window.App = {
       contract.methods.player2().call(async function (err, player2) {
         if (that.account === player1) {
           //if we're player 1
+          setInterval(checkState, 10*1000);
           document.getElementById('addy').innerHTML = address;
           if (player2 !== "0x0000000000000000000000000000000000000000") {
             //if there's already a player2
@@ -478,6 +494,7 @@ window.App = {
           document.getElementById('addy').innerHTML = address;
           that.fetchContractState();
           that.subscribe();
+          setInterval(checkState, 10*1000);
         } else {
           //if we're neither player, let's try to join.
           const joinGame = (obj) => {
@@ -511,6 +528,7 @@ window.App = {
             document.getElementById('cancelContract').style.display = 'none';
             document.getElementById('addy').innerHTML = address;
             that.subscribe(); 
+            setInterval(checkState, 10*1000);
           }
 
         }
@@ -564,16 +582,17 @@ window.App = {
     let num = Number(contractState[1]);
     let whoseTurn = contractState[2];
 
+    document.getElementById('chainNumber').innerHTML = num;
+    document.getElementById('chainSequence').innerHTML = seq;
+    document.getElementById('chainWhoseTurn').innerHTML = whoseTurn
+    document.getElementById('oppAddress').innerHTML = that.opponent;
+
     if (seq > that.seq) {
       that.seq = seq;
       that.num = num;
       that.whoseTurn = whoseTurn;
       that.pendingMove = null;
       that.signature = null;
-      document.getElementById('chainNumber').innerHTML = that.num;
-      document.getElementById('chainSequence').innerHTML = that.seq;
-      document.getElementById('chainWhoseTurn').innerHTML = that.whoseTurn
-      document.getElementById('oppAddress').innerHTML = that.opponent;
     }
 
     let obj = JSON.parse(localStorage.getItem(this.contract.options.address)); 
@@ -587,11 +606,11 @@ window.App = {
         that.whoseTurn = obj.whoseTurn;
         that.signature = obj.signature;
         that.pendingMove = obj.pendingMove;
-        document.getElementById('number').innerHTML = obj.num;
-        document.getElementById('sequence').innerHTML = obj.seq;
-        document.getElementById('signature').innerHTML = obj.signature;
-        document.getElementById('oppAddress').innerHTML = obj.opponent;
       }      
+      document.getElementById('number').innerHTML = that.num;
+      document.getElementById('sequence').innerHTML = that.seq;
+      document.getElementById('signature').innerHTML = that.signature;
+      document.getElementById('oppAddress').innerHTML = that.opponent;
     } catch(err) {
       console.log("Nothing to fetch")
     }
@@ -807,7 +826,6 @@ window.App = App;
 //     // App.updateIfValid(msg.message.move, msg.message.signature);
 //   },
 // });
-
 
 window.addEventListener("load", async function() {
   if (window.ethereum) {

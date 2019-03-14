@@ -457,6 +457,10 @@ window.App = {
 
     function checkState() {
       that.fetchContractState();
+
+      that.contract.events.TimeoutStarted(function () {
+        console.log("YESSIR timeout made");
+      });
     }
 
     let address = document.getElementById('address').value;
@@ -535,7 +539,7 @@ window.App = {
       })
     })
     document.getElementById('timeoutButton').disabled = false;
-          
+    console.log("that", that);
   },
 
 
@@ -777,18 +781,6 @@ move: async function (n) {
 contractMove: async function (n, cb) {
   var that = this;
 
-  // const getGasEstimate = (obj) => {
-  //   return new Promise((resolve, reject) => {
-  //     this.contract.methods.moveFromState(
-  //       this.seq, 
-  //       this.num,
-  //       this.signature, 
-  //       n).estimateGas(obj).then((gasAmount) => {
-  //         resolve(gasAmount);
-  //     })
-  //   })
-  // };
-
   const moveOnChain = (obj) => {
     return new Promise((resolve, reject) => {
       this.contract.methods.moveFromState(
@@ -801,10 +793,6 @@ contractMove: async function (n, cb) {
     })
   };
 
-  // const gasPrice = getGasEstimate({
-  //   from: this.account
-  // });
-
   const move = await moveOnChain({
     from: this.account,
     gas: 2000000
@@ -815,17 +803,6 @@ contractMove: async function (n, cb) {
 };
 
 window.App = App;
-// let pubnub = new PubNub({
-//   publishKey: 'pub-c-bb74265f-0631-4f6f-b34f-67dc66d76cfb',
-//   subscribeKey: 'sub-c-5b729cbc-2bd6-11e9-828a-52de7eb65672'
-// });
-
-// pubnub.addListener({
-//   message: msg => {
-//     console.log("MY MESSAGE IS", msg);
-//     // App.updateIfValid(msg.message.move, msg.message.signature);
-//   },
-// });
 
 window.addEventListener("load", async function() {
   if (window.ethereum) {

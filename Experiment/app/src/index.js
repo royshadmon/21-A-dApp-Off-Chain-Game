@@ -37,13 +37,15 @@ pubnub.addListener({
     // console.log("MY MESSAGE IS", message.move);
     try {
       if (message.timeout) {
-        console.log("RECEIVED MESSAGE", message);
-        App.fetchContractState();
+        console.log("RECEIVED MESSAGE timeout", message);
+        App.updateLatePlayer(message.player);
       }
-      else if (message.update) {
-        App.fetchContractState();
+      else if (message.noLatePlayer) {
+        console.log("RECEIVED MESSAGE noLatePlayer", message);
+        App.updateLatePlayer(NaN);
       }
       else {
+        console.log("RECEIVED MESSAGE updateIfValid", message);
         App.updateIfValid(message.move, message.signature);
       }
     } catch(err) {
@@ -210,6 +212,23 @@ window.App = {
   //   }
   // },
 
+  updateLatePlayer: function (player) {
+    let that = this;
+    let obj = JSON.parse(localStorage.getItem(that.contract.options.address)); 
+    
+    if (player) {
+      that.latePlayer = player;
+      obj.latePlayer = that.latePlayer;  
+    }
+    else {
+      that.latePlayer = null;
+      obj.latePlayer = that.latePlayer;
+    }
+    
+    localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
+    that.fetchContractState();
+  },
+
   moveFromStateAndStartTimeout: async function() {
     let that = this;
     
@@ -233,58 +252,62 @@ window.App = {
 
       if (transactionHash) {
         console.log("TIMEOUT STARTED", transactionHash);
+        that.sendTimeoutMessage();
       }
       else {
         console.log("TIMEOUT FAILED", transactionHash); 
       }
       that.fetchContractState();
-    }
-
-    async function chainMove(seq, pendingMove) {
-      const move = (obj) => {
-        return new Promise((resolve, reject) => {
-          that.contract.methods.move(seq, pendingMove).send(obj, (error, transactionHash) => {
-            if (error) {
-              reject(error);
-            } else {
-              resolve(transactionHash);
-            }
-          })
-        })
-      };
-
-      const transactionHash = await move({
-        from: that.account
-      });
-
-      const message = {
-        timeout: true
-      };
-      let channel = '21-' + that.contract.options.address;
-      await pubnub.publish({
-        channel: channel,
-        message
-      });
-
-      that.fetchContractState();
-    }
+  }
 
     console.log("THIS IS IS ", this);
+    console.log("THAT THAT", that);
     // this.signature means the other user has sent them a move
-    if (this.pendingMove && this.signature) {
+    if (this.pendingMove && !(this.signature)) {
       console.log("Newest move is on-chain", this);
-      this.contractMove(this.pendingMove);
-      await startTimeout();
+      await that.chainMove(this.seq, this.pendingMove);
     }
     else {  
+      await this.contractMove(this.pendingMove);
       // nothing
     }
+    await startTimeout();
     await this.fetchContractState();
+  },
+
+  chainMove: async function (seq, pendingMove) {
+    let that = this;
+    const move = (obj) => {
+      return new Promise((resolve, reject) => {
+        that.contract.methods.move(seq, pendingMove).send(obj, (error, transactionHash) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(transactionHash);
+          }
+        })
+      })
+    };
+
+    const transactionHash = await move({
+      from: that.account
+    });
+
+    const message = {
+      timeout: true
+    };
+    let channel = '21-' + that.contract.options.address;
+    await pubnub.publish({
+      channel: channel,
+      message
+    });
+
+    that.fetchContractState();
   },
 
   sendUpdateMessage: function () {
     const message = {
-      update: true
+      noLatePlayer: true
     };
     let channel = '21-' + this.contract.options.address;
     pubnub.publish({
@@ -292,6 +315,18 @@ window.App = {
       message
     });
   }, 
+
+  sendTimeoutMessage: function () {
+    const message = {
+      timeout: true,
+      player: this.opponent
+    };
+    let channel = '21-' + this.contract.options.address;
+    pubnub.publish({
+      channel: channel,
+      message
+    }); 
+  },
 
   //this function starts a new instance of a game
   startGame: async function() {
@@ -666,42 +701,57 @@ move: async function (n) {
   console.log("MOVEE THAT", that);
   if (this.num + n === 21) { 
     this.contractMove(n);
-  } 
-  // else if (that.latePlayer){
-  //     this.contractMove(n);
-  //     that.latePlayer = null;
-  //     obj.latePlayer = null;
-  //     localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
-  //     that.sendUpdateMessage();
-  //   } 
-  else {
+  } else {
       //const address = web3.utils.toChecksumAddress(this.account);
-      const channel = '21-' + that.contract.options.address;
       
-      web3.eth.personal.sign(message, this.account,
-        async (error, signature) => {
-          if (error) return console.log("move error", error);
-          
-          // if (checked) { //if user wants on chain transaction
-          //   that.contractMove(that.pendingMove);
-          // }
-          const message = {
-            move: n,
-            signature: signature
-          };
-          
-          pubnub.publish({
-            channel: channel,
-            message
-          });
-          that.whoseTurn = that.opponent;
-          that.pendingMove = n; 
-          obj.pendingMove = that.pendingMove;
-          obj.whoseTurn = that.whoseTurn;
-          localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
-          document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;   
+      if (that.latePlayer === that.account){
+            const getState = (obj) => {
+              return new Promise((resolve, reject) => {
+                that.contract.methods.state().call(obj).then((state) => {
+                  resolve(state);          
+                }) 
+              })
+            };
+            const contractState = await getState({
+              from: this.account
+            });
+
+            let seq = Number(contractState[0]);
+            console.log("SEQUENCE", seq);
+            this.chainMove(seq, n);
+            that.sendUpdateMessage();
+            that.pendingMove = null; 
+            obj.pendingMove = that.pendingMove;
+      } else {
+      
+          web3.eth.personal.sign(message, this.account,
+            async (error, signature) => {
+              if (error) return console.log("move error", error);
+              
+              // if (checked) { //if user wants on chain transaction
+              //   that.contractMove(that.pendingMove);
+              // }
+              
+              const message = {
+                move: n,
+                signature: signature
+              };
+              const channel = '21-' + that.contract.options.address;
+              pubnub.publish({
+                channel: channel,
+                message
+              });   
+              that.pendingMove = n; 
+              obj.pendingMove = that.pendingMove;
         });
+        that.whoseTurn = that.opponent;
+        obj.whoseTurn = that.whoseTurn;
+        localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
+        document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;  
+      }
   }
+
+  console.log("AFTER MOVE", that);
 },
 
 

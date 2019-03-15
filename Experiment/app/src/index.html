@@ -8,9 +8,6 @@
       display: block;
       margin-bottom: 12px;
     }
-/*    body {
-      visibility: hidden;
-    }*/
   </style>
   <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
   
@@ -63,7 +60,8 @@
 <br><br><br>
 
 <!-- <div>Time left = <span id="timer"></span></div> -->
-    <button id="timeoutButton" onclick="App.moveFromStateAndStartTimeout()">Start Timeout</button>
+    <button class="w3-button w3-circle w3-aqua" id="timeoutButton" onclick="App.moveFromStateAndStartTimeout()">Start Timeout</button>
+    <button style="display:none" class="w3-button w3-circle w3-red" id="claimButton" onclick="App.claimTimeout()">Claim Timeout</button>
     <div class="hidden" id="timeout">
       <p>Time <strong id="timer">loading...</strong></p>
     </div>

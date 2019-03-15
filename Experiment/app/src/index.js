@@ -57,7 +57,7 @@ pubnub.addListener({
   }
 });
 
-document.getElementById('timeoutButton').disabled = true;
+document.getElementById('timeoutButton').style.display = 'none';
 
 
 window.App = {
@@ -119,102 +119,38 @@ window.App = {
     ).toString("hex");
   },
 
-  // beginTimeout: async function () {
-  //   this.fetchContractState();
-  //   let startTime = "05:00"
-  //   document.getElementById('timer').innerHTML = startTime;
-  //   let item = document.getElementById('timeout');
-  //   item.className = 'unhidden' ;
-  //   this.value = 'hide';
-  //   document.getElementById('timeoutButton').disabled = true;
-  //   startTimer();
+  beginTimeout: async function () {
+    console.log("STARTING TIMEOUT");
+    let startTime = "05:00";
+    document.getElementById('timer').innerHTML = startTime;
+    let item = document.getElementById('timeout');
+    item.className = 'unhidden' ;
+    this.value = 'hide';
+    document.getElementById('timeoutButton').style.display = 'none';
 
-  //   function checkSecond(sec) {
-  //     if (sec < 10 && sec >= 0) {sec = "0" + sec}; // add zero in front of numbers < 10
-  //     if (sec < 0) {sec = "59"};
-  //     return sec;
-  //   }
-  //   function startTimer() {
-  //       let presentTime = document.getElementById('timer').innerHTML;
-  //       let timeArray = presentTime.split(/[:]+/);
-  //       let m = timeArray[0];
-  //       let s = checkSecond((timeArray[1] - 1));
-  //       if(s==59){m=m-1}
-  //       if(m<0){
-  //         alert('timer completed')
-  //         clearTimeout();
-  //       }
-        
-  //       document.getElementById('timer').innerHTML =
-  //         m + ":" + s;
-  //       setTimeout(startTimer, 1000);
-  //   }
+    function startTimer(duration, display) {
+        var timer = duration, minutes, seconds;
+        setInterval(function () {
+            minutes = parseInt(timer / 60, 10)
+            seconds = parseInt(timer % 60, 10);
 
-  // },
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
 
-  //https://codepen.io/ishanbakshi/pen/pgzNMv
-  // startTimeout: async function() {
-  //   let that = this;
+            display.textContent = minutes + ":" + seconds;
 
-  //   let address = document.getElementById('address').value;
-  //   const channel = '21-' + that.contract.options.address;
+            if (--timer < 0) {
+                timer = duration;
+            }
+        }, 1000);
+    }
 
-  //   const timeout = (obj) => {
-  //     return new Promise((resolve, reject) => {
-  //       that.contract.methods.startTimeout().send(obj, (error, transactionHash) => {
-  //         if (error) {
-  //           reject(error);
-  //         } else {
-  //           resolve(transactionHash);
-  //         }
-  //       })
-  //     })
-  //   };
-
-  //   const transactionHash = await timeout({
-  //     from: that.account
-  //   });
-
-  //   const message = {
-  //     timeout: true,
-  //     timeLeft: 5,
-  //   };
+    var fiveMinutes = 60 * 5,
+    display = document.getElementById('timer');
+    startTimer(fiveMinutes, display);
     
-  //   pubnub.publish({
-  //     channel: channel,
-  //     message
-  //   });
 
-    
-  //   let startTime = "05:00"
-  //   document.getElementById('timer').innerHTML = startTime;
-  //   let item = document.getElementById('timeout');
-  //   item.className = 'unhidden' ;
-  //   this.value = 'hide';
-  //   document.getElementById('timeoutButton').disabled = true;
-  //   startTimer();
-
-  //   function checkSecond(sec) {
-  //     if (sec < 10 && sec >= 0) {sec = "0" + sec}; // add zero in front of numbers < 10
-  //     if (sec < 0) {sec = "59"};
-  //     return sec;
-  //   }
-  //   function startTimer() {
-  //       let presentTime = document.getElementById('timer').innerHTML;
-  //       let timeArray = presentTime.split(/[:]+/);
-  //       let m = timeArray[0];
-  //       let s = checkSecond((timeArray[1] - 1));
-  //       if(s==59){m=m-1}
-  //       if(m<0){
-  //         alert('timer completed')
-  //         clearTimeout();
-  //       }
-        
-  //       document.getElementById('timer').innerHTML =
-  //         m + ":" + s;
-  //       setTimeout(startTimer, 1000);
-  //   }
-  // },
+  },
 
   updateLatePlayer: function (player) {
     let that = this;
@@ -222,11 +158,12 @@ window.App = {
     
     if (player) {
       that.latePlayer = player;
-      obj.latePlayer = that.latePlayer;  
+      obj.latePlayer = that.latePlayer;        
     }
     else {
       that.latePlayer = null;
       obj.latePlayer = that.latePlayer;
+      document.getElementById('claimButton').style.display = 'block';
     }
     
     localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
@@ -276,6 +213,7 @@ window.App = {
       // nothing
     }
     await startTimeout();
+    document.getElementById('claimButton').style.display = 'block';
     await this.fetchContractState();
   },
 
@@ -341,6 +279,10 @@ window.App = {
 
     function checkState() {
       that.fetchContractState();
+
+      that.contract.events.TimeoutStarted(function () {
+        that.beginTimeout();
+      });
     }
 
     GameContract = new web3.eth.Contract(abi);
@@ -389,7 +331,7 @@ window.App = {
         obj.whoseTurn = that.whoseTurn;
         localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
         document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;
-        document.getElementById('timeoutButton').disabled = false;
+        document.getElementById('timeoutButton').style.display = 'block';
         document.getElementById('cancelContract').style.display = 'none';
         setInterval(checkState, 10*1000);
       }) 
@@ -413,6 +355,28 @@ window.App = {
     };
 
     await cancel({
+      from: that.account
+    });
+
+  },
+
+  claimTimeout: async function() {
+    let that = this; 
+
+    const claim = (obj) => {
+      return new Promise((resovle, reject) => {
+        that.contract.methods.claimTimeout().send(obj, (error, timeout) => {
+          if (error) {
+            reject(error);
+          }
+          else {
+            resolve(timeout);
+          }
+        })
+      })
+    };
+
+    await claim({
       from: that.account
     });
 
@@ -459,7 +423,7 @@ window.App = {
       that.fetchContractState();
 
       that.contract.events.TimeoutStarted(function () {
-        console.log("YESSIR timeout made");
+        that.beginTimeout();
       });
     }
 
@@ -538,7 +502,7 @@ window.App = {
         }
       })
     })
-    document.getElementById('timeoutButton').disabled = false;
+    document.getElementById('timeoutButton').style.display= 'block';
     console.log("that", that);
   },
 

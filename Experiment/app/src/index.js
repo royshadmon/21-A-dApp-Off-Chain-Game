@@ -39,12 +39,10 @@ pubnub.addListener({
       if (message.timeout) {
         console.log("RECEIVED MESSAGE timeout", message);
         App.updateLatePlayer(message.player);
-        App.fetchContractState();
       }
       else if (message.noLatePlayer) {
         console.log("RECEIVED MESSAGE noLatePlayer", message);
         App.updateLatePlayer(NaN);
-        App.fetchContractState();
       }
       else {
         console.log("RECEIVED MESSAGE updateIfValid", message);
@@ -75,7 +73,7 @@ window.App = {
   signature: null,
   timeout: null,
   latePlayer: null,
-  timeLeft: null,
+  timeout: false,
 
 
   start: async function() {
@@ -121,8 +119,8 @@ window.App = {
 
   beginTimeout: async function () {
     console.log("STARTING TIMEOUT");
-    let startTime = "05:00";
-    document.getElementById('timer').innerHTML = startTime;
+    // let startTime = "05:00";
+    // document.getElementById('timer').innerHTML = startTime;
     let item = document.getElementById('timeout');
     item.className = 'unhidden' ;
     this.value = 'hide';
@@ -130,7 +128,7 @@ window.App = {
 
     function startTimer(duration, display) {
         var timer = duration, minutes, seconds;
-        setInterval(function () {
+        let t = setInterval(function () {
             minutes = parseInt(timer / 60, 10)
             seconds = parseInt(timer % 60, 10);
 
@@ -140,12 +138,14 @@ window.App = {
             display.textContent = minutes + ":" + seconds;
 
             if (--timer < 0) {
-                timer = duration;
+                clearInterval(t);
+                return;
             }
         }, 1000);
     }
 
-    var fiveMinutes = 60 * 5,
+    // var fiveMinutes = 60 * 5,
+    var fiveMinutes = 1 * 10,
     display = document.getElementById('timer');
     startTimer(fiveMinutes, display);
     
@@ -158,12 +158,15 @@ window.App = {
     
     if (player) {
       that.latePlayer = player;
-      obj.latePlayer = that.latePlayer;        
+      obj.latePlayer = that.latePlayer;
     }
     else {
       that.latePlayer = null;
       obj.latePlayer = that.latePlayer;
-      document.getElementById('claimButton').style.display = 'block';
+      that.timeout = false;
+      let item = document.getElementById('timeout');
+      item.className = 'hidden' ;
+      document.getElementById('claimButton').style.display = 'none';
     }
     
     localStorage.setItem(that.contract.options.address, JSON.stringify(obj));
@@ -214,7 +217,7 @@ window.App = {
     }
     await startTimeout();
     document.getElementById('claimButton').style.display = 'block';
-    await this.fetchContractState();
+    this.fetchContractState();
   },
 
   chainMove: async function (seq, pendingMove) {
@@ -281,7 +284,11 @@ window.App = {
       that.fetchContractState();
 
       that.contract.events.TimeoutStarted(function () {
-        that.beginTimeout();
+        if (!that.timeout) {
+          that.timeout = true;
+          that.beginTimeout();  
+        }
+        
       });
     }
 
@@ -364,7 +371,7 @@ window.App = {
     let that = this; 
 
     const claim = (obj) => {
-      return new Promise((resovle, reject) => {
+      return new Promise((resolve, reject) => {
         that.contract.methods.claimTimeout().send(obj, (error, timeout) => {
           if (error) {
             reject(error);
@@ -423,7 +430,11 @@ window.App = {
       that.fetchContractState();
 
       that.contract.events.TimeoutStarted(function () {
-        that.beginTimeout();
+        if (!that.timeout) {
+          that.timeout = true;
+          that.beginTimeout();  
+        }
+        
       });
     }
 
@@ -483,7 +494,7 @@ window.App = {
           });
 
           const receipt = await web3.eth.getTransactionReceipt(transactionHash);
-
+          document.getElementById('timeoutButton').style.display= 'block';
           if (receipt.status) {
             // document.getElementById('addy').innerHTML = localStorage.address;
             that.contract = contract;
@@ -502,7 +513,6 @@ window.App = {
         }
       })
     })
-    document.getElementById('timeoutButton').style.display= 'block';
     console.log("that", that);
   },
 
@@ -705,7 +715,7 @@ move: async function (n) {
 
             let seq = Number(contractState[0]);
             console.log("SEQUENCE", seq);
-            this.chainMove(seq, n);
+            await this.chainMove(seq, n);
             that.sendUpdateMessage();
             that.pendingMove = null; 
             obj.pendingMove = that.pendingMove;
@@ -714,10 +724,6 @@ move: async function (n) {
           web3.eth.personal.sign(message, this.account,
             async (error, signature) => {
               if (error) return console.log("move error", error);
-              
-              // if (checked) { //if user wants on chain transaction
-              //   that.contractMove(that.pendingMove);
-              // }
               
               const message = {
                 move: n,

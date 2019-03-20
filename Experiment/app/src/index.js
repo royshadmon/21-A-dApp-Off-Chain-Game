@@ -144,8 +144,8 @@ window.App = {
         }, 1000);
     }
 
-    // var fiveMinutes = 60 * 5,
-    var fiveMinutes = 1 * 10,
+    var fiveMinutes = 60 * 5,
+    // var fiveMinutes = 1 * 10,
     display = document.getElementById('timer');
     startTimer(fiveMinutes, display);
     
@@ -520,6 +520,10 @@ window.App = {
   fetchContractState: async function () {
     let that = this;
 
+    if (that.whoseTurn === that.account) {
+      document.getElementById('timeoutButton').style.display = 'block';
+    }
+
     const getState = (obj) => {
       return new Promise((resolve, reject) => {
         that.contract.methods.state().call(obj).then((state) => {
@@ -593,37 +597,19 @@ window.App = {
       console.log("Nothing to fetch")
     }
     
-
-    // console.log("Fetching object state", obj);
-    // console.log("THAT in fetch", that);
-
-    // console.log("web3", this);
-    
-    // const BN = this.web3.utils.BN;
-    // let maxxx = new BN('115792089237316195423570985008687907853269984665640564039457584007913129639935');
-    // console.log("MAXXX", maxxx);
-    // const timeout = await getTimeout({});
-    // console.log("TIMEOUT", timeout, "MAXUINT", maxxx);
-    // console.log(timeout === maxxx);
-    // if (String(timeout) === String(maxxx)) {
-    //   // A value of 2^256-1 indicates no timeout.
-    //   that.timeout = null;
-    //   that.latePlayer = null;
-    //   obj.timeout = that.timeout;
-    //   obj.latePlayer = that.latePlayer;
-    // } else {
-    //   that.timeout = Number(timeout);
-    //   that.latePlayer = whoseTurn;
-    //   obj.timeout = that.timeout;
-    //   obj.latePlayer = that.latePlayer;
-    // }
-
-    
-
     const gameOver = await isGameOver({});
     that.gameOver = gameOver;
     obj.gameOver = that.gameOver;
     localStorage.setItem(this.contract.options.address, JSON.stringify(obj));
+
+    if (that.num + that.pendingMove <= 21) {
+      document.getElementById('number').innerHTML = that.num + that.pendingMove;
+    }
+
+    if (that.gameOver) {
+      document.getElementById('gameOver').innerHTML = "Game is over";
+    }
+
 
   },
 
@@ -695,12 +681,9 @@ move: async function (n) {
   let that = this;
   let message = this.stateHash(this.seq + 1, this.num + n);
   let obj = JSON.parse(localStorage.getItem(that.contract.options.address)); 
-  console.log("MOVEE THAT", that);
   if (this.num + n === 21) { 
     this.contractMove(n);
   } else {
-      //const address = web3.utils.toChecksumAddress(this.account);
-      
       if (that.latePlayer === that.account){
             const getState = (obj) => {
               return new Promise((resolve, reject) => {
@@ -721,7 +704,7 @@ move: async function (n) {
             obj.pendingMove = that.pendingMove;
       } else {
       
-          web3.eth.personal.sign(message, this.account,
+          await web3.eth.personal.sign(message, this.account,
             async (error, signature) => {
               if (error) return console.log("move error", error);
               
@@ -743,7 +726,7 @@ move: async function (n) {
         document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;  
       }
   }
-
+  that.fetchContractState();
   console.log("AFTER MOVE", that);
 },
 

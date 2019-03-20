@@ -217,7 +217,7 @@ window.App = {
     }
     await startTimeout();
     document.getElementById('claimButton').style.display = 'block';
-    this.fetchContractState();
+    await this.fetchContractState();
   },
 
   chainMove: async function (seq, pendingMove) {
@@ -520,8 +520,9 @@ window.App = {
   fetchContractState: async function () {
     let that = this;
 
-    if (that.whoseTurn === that.account) {
+    if (that.whoseTurn !== that.account) {
       document.getElementById('timeoutButton').style.display = 'block';
+      document.getElementById('moveButtons').style.display = 'none';
     }
 
     const getState = (obj) => {
@@ -606,6 +607,10 @@ window.App = {
       document.getElementById('number').innerHTML = that.num + that.pendingMove;
     }
 
+    if (that.whoseTurn === that.account) {
+      document.getElementById('moveButtons').style.display = 'block';
+    }
+
     if (that.gameOver) {
       document.getElementById('gameOver').innerHTML = "Game is over";
     }
@@ -668,6 +673,7 @@ window.App = {
     document.getElementById('signature').innerHTML = obj.signature;
     document.getElementById('oppAddress').innerHTML = obj.opponent; 
     document.getElementById('whoseTurn').innerHTML = obj.whoseTurn;  
+    document.getElementById('moveButtons').style.display = 'block';
     
   },
 
@@ -679,6 +685,10 @@ move: async function (n) {
   // const n = parseInt(document.getElementById('move').value);
   // const checked = document.getElementById('onChain').checked;
   let that = this;
+  if (this.num + n > 21) {
+    alert("Invalid Move");
+    return;
+  }
   let message = this.stateHash(this.seq + 1, this.num + n);
   let obj = JSON.parse(localStorage.getItem(that.contract.options.address)); 
   if (this.num + n === 21) { 

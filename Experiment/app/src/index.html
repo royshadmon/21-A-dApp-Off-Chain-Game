@@ -25,10 +25,12 @@
     </form>
     <br>
     <!-- <label for="move">Move</label><input type="text" id="move"> -->
-    <button id="makeMove" class="w3-button w3-circle w3-teal"" onclick="App.move(1)">+1</button>
-    <button id="makeMove" class="w3-button w3-circle w3-teal"" onclick="App.move(2)">+2</button>
-    <button id="makeMove" class="w3-button w3-circle w3-teal"" onclick="App.move(3)">+3</button>
-    <button id="fetch" class="button button4" onclick="App.fetchContractState()">Fetch State</button>
+    <div id="moveButtons" style="display:none"> 
+      <button id="makeMove" class="w3-button w3-circle w3-teal"" onclick="App.move(1)">+1</button>
+      <button id="makeMove" class="w3-button w3-circle w3-teal"" onclick="App.move(2)">+2</button>
+      <button id="makeMove" class="w3-button w3-circle w3-teal"" onclick="App.move(3)">+3</button>
+    </div>
+      <button id="fetch" class="button button4" onclick="App.fetchContractState()">Fetch State</button>
     <h2 id='number'></h2>
     <h2 id='gameOver'></h2>
 
@@ -44,18 +46,18 @@
 
     <br>
     <h2>On chain game state</h2>
-    <p>Current Num<strong id="chainNumber"> loading...</strong></p>
-    <p>Current Seq<strong id="chainSequence"> loading...</strong></p>
-    <p>Whose Turn<strong id="chainWhoseTurn"> loading...</strong></p>
+    <p>Current Num <strong id="chainNumber"> loading...</strong></p>
+    <p>Current Seq <strong id="chainSequence"> loading...</strong></p>
+    <p>Whose Turn <strong id="chainWhoseTurn"> loading...</strong></p>
     <br>
 
     <br>
     <h2>Opponents most recent move</h2>
-    <p>Current Num<strong id="number"> loading...</strong></p>
-    <p>Current Seq<strong id="sequence"> loading...</strong></p>
-    <p>Opponent Signature<strong id="signature"> loading...</strong></p>
-    <p>Opponent Address<strong id="oppAddress"> loading...</strong></p>
-    <p>Whose Turn<strong id="whoseTurn"> loading...</strong></p>
+    <p>Current Num <strong id="number"> loading...</strong></p>
+    <p>Current Seq <strong id="sequence"> loading...</strong></p>
+    <p>Opponent Signature <strong id="signature"> loading...</strong></p>
+    <p>Opponent Address <strong id="oppAddress"> loading...</strong></p>
+    <p>Whose Turn <strong id="whoseTurn"> loading...</strong></p>
     <br>
 
 <br><br><br>

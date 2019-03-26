@@ -314,7 +314,7 @@ window.App = {
       from: that.account,
       gas: 2000000,
       gasPrice: 3000000000,
-      value: web3.utils.toWei('0.1', 'ether'),
+      value: web3.utils.toWei('1', 'ether'),
     });
 
     localStorage.setItem(contract.options.address, JSON.stringify(game));
@@ -489,7 +489,7 @@ window.App = {
           };
 
           const transactionHash = await joinGame({
-            value: web3.utils.toWei('0.1', 'ether'),
+            value: web3.utils.toWei('1', 'ether'),
             from: that.account
           });
 
